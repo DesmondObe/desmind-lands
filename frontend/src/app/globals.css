@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+/*
+ * DesMind Lands. The palette is the land itself: deep forest green (the brand), laterite, the
+ * red earth of southern Nigeria (the warm accent), and brass for the fine lines of a survey
+ * plan. Pages reach for the semantic tokens (canvas, surface, ink, line, primary, accent);
+ * the dark theme redefines them, and remaps the scales pages use directly.
+ *
+ * The theme lives on <html data-theme>, set before first paint by app/layout.tsx.
+ */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Forest: the brand. */
+  --color-forest-50: oklch(0.975 0.014 155);
+  --color-forest-100: oklch(0.94 0.035 155);
+  --color-forest-200: oklch(0.88 0.06 155);
+  --color-forest-300: oklch(0.79 0.085 155);
+  --color-forest-400: oklch(0.67 0.1 155);
+  --color-forest-500: oklch(0.56 0.1 156);
+  --color-forest-600: oklch(0.47 0.09 157);
+  --color-forest-700: oklch(0.39 0.075 158);
+  --color-forest-800: oklch(0.32 0.06 160);
+  --color-forest-900: oklch(0.26 0.048 162);
+  --color-forest-950: oklch(0.19 0.035 165);
+
+  /* Laterite: red earth, the warm accent. */
+  --color-earth-50: oklch(0.97 0.018 50);
+  --color-earth-100: oklch(0.93 0.04 48);
+  --color-earth-200: oklch(0.86 0.07 46);
+  --color-earth-300: oklch(0.77 0.105 44);
+  --color-earth-400: oklch(0.68 0.135 42);
+  --color-earth-500: oklch(0.6 0.15 40);
+  --color-earth-600: oklch(0.53 0.145 38);
+  --color-earth-700: oklch(0.45 0.12 36);
+  --color-earth-800: oklch(0.37 0.095 35);
+
+  /* Brass: survey lines, eyebrows, the logo's beacon. */
+  --color-brass-100: oklch(0.95 0.035 85);
+  --color-brass-200: oklch(0.9 0.065 84);
+  --color-brass-300: oklch(0.85 0.09 82);
+  --color-brass-400: oklch(0.78 0.11 78);
+  --color-brass-500: oklch(0.72 0.12 75);
+  --color-brass-600: oklch(0.6 0.11 72);
+  --color-brass-700: oklch(0.5 0.09 70);
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+
+  --color-canvas: var(--t-canvas);
+  --color-surface: var(--t-surface);
+  --color-sunken: var(--t-sunken);
+  --color-line: var(--t-line);
+  --color-line-strong: var(--t-line-strong);
+  --color-ink: var(--t-ink);
+  --color-ink-soft: var(--t-ink-soft);
+  --color-ink-faint: var(--t-ink-faint);
+  --color-primary: var(--t-primary);
+  --color-primary-hover: var(--t-primary-hover);
+  --color-on-primary: var(--t-on-primary);
+  --color-accent: var(--t-accent);
+  --color-danger: var(--t-danger);
+
+  --shadow-soft: 0 1px 2px oklch(0.2 0.03 160 / 0.05), 0 4px 16px -6px oklch(0.2 0.03 160 / 0.1);
+  --shadow-lift: 0 2px 4px oklch(0.2 0.03 160 / 0.05), 0 28px 56px -18px oklch(0.2 0.04 160 / 0.3);
+
+  --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-draw: draw 2.4s cubic-bezier(0.6, 0, 0.2, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* A survey line being drawn: pair with pathLength="1" and stroke-dasharray 1. */
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+:root {
+  color-scheme: light;
+  --t-canvas: oklch(0.982 0.008 85);
+  --t-surface: oklch(1 0 0);
+  --t-sunken: oklch(0.955 0.012 85);
+  --t-line: oklch(0.905 0.012 82);
+  --t-line-strong: oklch(0.84 0.016 80);
+  --t-ink: oklch(0.21 0.025 160);
+  --t-ink-soft: oklch(0.43 0.02 150);
+  --t-ink-faint: oklch(0.58 0.015 130);
+  --t-primary: var(--color-forest-900);
+  --t-primary-hover: var(--color-forest-950);
+  --t-on-primary: oklch(0.99 0.01 155);
+  --t-accent: var(--color-earth-500);
+  --t-danger: oklch(0.55 0.2 27);
+  /* The deep green of the hero, the footer and the deal room's header. */
+  --deep: oklch(0.22 0.04 162);
+  --deep-2: oklch(0.17 0.03 165);
+}
+
+@media screen {
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --t-canvas: oklch(0.16 0.015 165);
+    --t-surface: oklch(0.2 0.018 163);
+    --t-sunken: oklch(0.14 0.013 165);
+    --t-line: oklch(0.28 0.02 163);
+    --t-line-strong: oklch(0.36 0.022 163);
+    --t-ink: oklch(0.95 0.01 120);
+    --t-ink-soft: oklch(0.77 0.015 140);
+    --t-ink-faint: oklch(0.62 0.015 150);
+    --t-primary: oklch(0.8 0.11 155);
+    --t-primary-hover: oklch(0.86 0.09 155);
+    --t-on-primary: oklch(0.19 0.04 162);
+    --t-accent: oklch(0.72 0.13 44);
+    --t-danger: oklch(0.65 0.19 25);
+    --deep: oklch(0.2 0.03 163);
+    --deep-2: oklch(0.13 0.02 165);
+
+    --color-forest-50: oklch(0.23 0.03 160);
+    --color-forest-100: oklch(0.28 0.05 158);
+    --color-forest-200: oklch(0.35 0.07 157);
+    --color-forest-300: oklch(0.45 0.09 156);
+    --color-forest-700: oklch(0.8 0.1 155);
+    --color-forest-800: oklch(0.86 0.08 155);
+    --color-forest-900: oklch(0.91 0.06 155);
+
+    --color-earth-50: oklch(0.24 0.035 42);
+    --color-earth-100: oklch(0.3 0.06 42);
+    --color-earth-200: oklch(0.38 0.08 42);
+    --color-earth-700: oklch(0.8 0.11 45);
+    --color-earth-800: oklch(0.86 0.08 48);
+
+    --color-brass-100: oklch(0.27 0.04 80);
+    --color-brass-200: oklch(0.34 0.06 80);
+    --color-brass-700: oklch(0.82 0.1 80);
+
+    --color-amber-50: oklch(0.25 0.035 75);
+    --color-amber-100: oklch(0.31 0.06 75);
+    --color-amber-800: oklch(0.86 0.11 82);
+    --color-red-50: oklch(0.25 0.045 25);
+    --color-red-100: oklch(0.31 0.08 25);
+    --color-red-700: oklch(0.76 0.14 22);
+    --color-red-800: oklch(0.82 0.11 22);
+    --color-sky-100: oklch(0.31 0.06 235);
+    --color-sky-800: oklch(0.84 0.09 230);
+    --color-stone-100: oklch(0.25 0.016 165);
+    --color-stone-200: oklch(0.3 0.018 165);
+    --color-stone-700: oklch(0.82 0.012 150);
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-canvas);
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply min-h-dvh bg-canvas font-sans text-ink antialiased;
+    overflow-x: clip;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  ::selection {
+    background: var(--color-earth-200);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  /* biome-ignore-start lint/complexity/noImportantStyles: theme switches and reduced motion must beat utilities. */
+  html.theme-transition,
+  html.theme-transition * {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: - */
+  .bleed {
+    margin-inline: calc(50% - 50vw);
+  }
+  @media print {
+    body {
+      background: white;
+    }
+  }
+}
+
+@layer components {
+  /* The deep green ground of the hero and footer, lit from one corner. */
+  .deep-ground {
+    background:
+      radial-gradient(900px 500px at 85% -10%, oklch(0.42 0.09 155 / 0.45), transparent 65%),
+      radial-gradient(700px 420px at -10% 110%, oklch(0.45 0.12 40 / 0.22), transparent 70%),
+      linear-gradient(180deg, var(--deep), var(--deep-2));
+  }
+  /* Survey paper: a faint grid, as on a plan. */
+  .survey-grid {
+    background-image:
+      linear-gradient(to right, var(--grid-line, oklch(0.5 0.03 160 / 0.07)) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line, oklch(0.5 0.03 160 / 0.07)) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  /* Prose in the agreement and guides. */
+  .agreement {
+    font-family: var(--font-display);
+    font-size: 15.5px;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    color: var(--color-ink);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

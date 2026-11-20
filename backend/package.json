@@ -1,0 +1,43 @@
+{
+  "name": "@lands/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "worker:dev": "tsx watch --env-file-if-exists=.env src/worker.ts",
+    "start": "node dist/server.js",
+    "start:worker": "node dist/worker.js",
+    "build": "tsc -p tsconfig.build.json",
+    "db:local": "tsx scripts/local-postgres.ts",
+    "db:migrate": "tsx --env-file-if-exists=.env src/migrate.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "admin:grant": "tsx --env-file-if-exists=.env scripts/grant-admin.ts",
+    "seed:demo": "tsx --env-file-if-exists=.env scripts/seed-demo.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/cors": "^11.3.0",
+    "@fastify/helmet": "^13.1.1",
+    "@fastify/rate-limit": "^11.2.0",
+    "@node-rs/argon2": "^2.2.1",
+    "@pdf-lib/fontkit": "^1.1.1",
+    "aws4fetch": "^1.0.20",
+    "drizzle-orm": "^0.45.3",
+    "fastify": "^5.12.8",
+    "nodemailer": "^10.5.0",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.23.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.23.1",
+    "embedded-postgres": "^18.4.0-beta.17",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

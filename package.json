@@ -1,0 +1,26 @@
+{
+  "name": "desmind-lands",
+  "private": true,
+  "description": "DesMind Lands: land sold directly between owner and buyer, witnessed and on record. No agents.",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev:db": "npm run db:local --workspace @lands/backend",
+    "dev:backend": "npm run dev --workspace @lands/backend",
+    "dev:worker": "npm run worker:dev --workspace @lands/backend",
+    "dev:frontend": "npm run dev --workspace @lands/frontend",
+    "db:migrate": "npm run db:migrate --workspace @lands/backend",
+    "test": "npm test --workspace @lands/backend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "biome check .",
+    "format": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14"
+  }
+}
