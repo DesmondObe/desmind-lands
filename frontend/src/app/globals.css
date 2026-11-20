@@ -49,10 +49,12 @@
   --color-brass-600: oklch(0.6 0.11 72);
   --color-brass-700: oklch(0.5 0.09 70);
 
+  /* One corner scale: controls 10px, tiles 14px, cards 20px, panels 28px. */
   --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius-3xl: 1.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.875rem;
+  --radius-3xl: 1.25rem;
+  --radius-4xl: 1.75rem;
 
   --color-canvas: var(--t-canvas);
   --color-surface: var(--t-surface);
@@ -68,8 +70,9 @@
   --color-accent: var(--t-accent);
   --color-danger: var(--t-danger);
 
-  --shadow-soft: 0 1px 2px oklch(0.2 0.03 160 / 0.05), 0 4px 16px -6px oklch(0.2 0.03 160 / 0.1);
-  --shadow-lift: 0 2px 4px oklch(0.2 0.03 160 / 0.05), 0 28px 56px -18px oklch(0.2 0.04 160 / 0.3);
+  --shadow-soft: 0 1px 1px oklch(0.2 0.03 160 / 0.04), 0 2px 6px -2px oklch(0.2 0.03 160 / 0.06);
+  --shadow-card: 0 1px 2px oklch(0.2 0.03 160 / 0.04), 0 8px 24px -12px oklch(0.2 0.03 160 / 0.14);
+  --shadow-lift: 0 2px 4px oklch(0.2 0.03 160 / 0.04), 0 24px 48px -16px oklch(0.2 0.04 160 / 0.26);
 
   --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade-in: fade-in 0.25s ease-out both;
@@ -126,14 +129,14 @@
 
 :root {
   color-scheme: light;
-  --t-canvas: oklch(0.982 0.008 85);
+  --t-canvas: oklch(0.985 0.006 85);
   --t-surface: oklch(1 0 0);
-  --t-sunken: oklch(0.955 0.012 85);
-  --t-line: oklch(0.905 0.012 82);
-  --t-line-strong: oklch(0.84 0.016 80);
-  --t-ink: oklch(0.21 0.025 160);
-  --t-ink-soft: oklch(0.43 0.02 150);
-  --t-ink-faint: oklch(0.58 0.015 130);
+  --t-sunken: oklch(0.962 0.009 85);
+  --t-line: oklch(0.915 0.01 82);
+  --t-line-strong: oklch(0.855 0.014 80);
+  --t-ink: oklch(0.2 0.025 160);
+  --t-ink-soft: oklch(0.39 0.02 155);
+  --t-ink-faint: oklch(0.55 0.015 140);
   --t-primary: var(--color-forest-900);
   --t-primary-hover: var(--color-forest-950);
   --t-on-primary: oklch(0.99 0.01 155);
@@ -210,6 +213,19 @@
   h2,
   h3 {
     text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Fraunces at its display optical size, a touch soft: the voice of headings and prices. */
+  .font-display {
+    font-variation-settings:
+      "opsz" 72,
+      "SOFT" 30;
+    letter-spacing: -0.004em;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
   ::selection {
     background: var(--color-earth-200);

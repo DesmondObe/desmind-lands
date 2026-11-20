@@ -13,9 +13,15 @@ export default function Terms() {
       </p>
       <h2>What we are, and what we are not</h2>
       <p>
-        We are <strong>not an estate agent</strong>, broker or party to any sale. We do not hold money, act for either
-        side, or guarantee the title to, or the condition of, any land. Reviewing a listing is not a guarantee that its
-        title is good. Buyers must make their own checks, and we strongly recommend independent legal and survey advice.
+        We are <strong>not an estate agent</strong>, broker or party to any sale. We do not hold money or act for either
+        side. For now, DesMind Lands lists land in Enugu State only.
+      </p>
+      <h2>Our title search</h2>
+      <p>
+        Before a listing is published, our staff search its title at the Enugu State Ministry of Lands and record the
+        search reference and what it showed. A search reports what the Ministry&apos;s records showed on the day it was
+        made. It is not a guarantee of the title to, or the condition of, any land, and records can be wrong or change.
+        Buyers must still make their own checks, and we strongly recommend independent legal and survey advice.
       </p>
       <h2>Sellers</h2>
       <p>

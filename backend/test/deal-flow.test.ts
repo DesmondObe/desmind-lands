@@ -22,6 +22,7 @@ async function liveListing(seller: Agent, admin: Agent, overrides: Partial<typeo
   await upload(seller, { listingId: id }, "photo");
   await upload(seller, { listingId: id }, "title_document", "application/pdf");
   expect((await seller.post(`/listings/${id}/status`, { status: "in_review" })).status).toBe(200);
+  expect((await admin.post(`/admin/listings/${id}/title-search`, { reference: "ENS/MLS/1234" })).status).toBe(200);
   expect((await admin.post(`/listings/${id}/status`, { status: "published" })).status).toBe(200);
   return id;
 }
@@ -41,6 +42,8 @@ describe("listings", () => {
     await makeAdmin(admin);
     const stranger = await signUp(app, "Nosy Neighbour");
 
+    // For now, land in Enugu State only.
+    expect((await seller.post("/listings", { ...LAND, state: "Lagos", lga: "" })).status).toBe(400);
     const created = await seller.post("/listings", LAND);
     const id = created.body.listing.id;
     // A draft is the seller's alone.
@@ -51,12 +54,18 @@ describe("listings", () => {
     expect((await seller.post(`/listings/${id}/status`, { status: "in_review" })).status).toBe(200);
     // A seller cannot publish their own land.
     expect((await seller.post(`/listings/${id}/status`, { status: "published" })).status).toBe(409);
+    // Not before its title has been searched at the Ministry of Lands, and only staff record that.
+    expect((await admin.post(`/listings/${id}/status`, { status: "published" })).status).toBe(422);
+    expect((await seller.post(`/admin/listings/${id}/title-search`, { reference: "ENS/MLS/1" })).status).toBe(403);
+    expect((await admin.post(`/admin/listings/${id}/title-search`, { reference: "ENS/MLS/1234" })).status).toBe(200);
     expect((await admin.post(`/listings/${id}/status`, { status: "published" })).status).toBe(200);
 
     const seen = await stranger.get(`/listings/${id}`);
     expect(seen.status).toBe(200);
     expect(seen.body.listing.addressLine).toBe("");
     expect(seen.body.listing.titleReference).toBe("");
+    expect(seen.body.listing.titleSearchedAt).toBeTruthy();
+    expect(seen.body.listing.titleSearchRef).toBe("");
     expect(seen.body.photos).toHaveLength(1);
     const market = await stranger.get("/listings?q=Emene");
     expect(market.body.listings.map((l: { id: string }) => l.id)).toContain(id);
@@ -274,5 +283,104 @@ describe("a deal, from offer to handover", () => {
     // Cancelling puts the land back on the market.
     expect((await buyer.post(`/deals/${dealId}/cancel`, { reason: "Changed my mind" })).status).toBe(200);
     expect((await buyer.get(`/listings/${listingId}`)).body.listing.status).toBe("published");
+  });
+});
+
+describe("what the audit found", () => {
+  it("lets only one of two buyers accepting at the same moment take the land", async () => {
+    const seller = await signUp(app, "Ngozi Ani");
+    const admin = await signUp(app, "Review Staff");
+    await makeAdmin(admin);
+    const listingId = await liveListing(seller, admin);
+    // The seller counters two buyers; both say yes at once.
+    const accepts = await Promise.all(
+      ["First Buyer", "Second Buyer"].map(async (name) => {
+        const buyer = await signUp(app, name);
+        const dealId = (await buyer.post(`/listings/${listingId}/deals`, { amountKobo: 1_200_000_000 })).body.deal.id;
+        await seller.post(`/deals/${dealId}/offers`, { amountKobo: 1_400_000_000 });
+        const room = await buyer.get(`/deals/${dealId}`);
+        const counter = room.body.offers.find((o: { status: string }) => o.status === "open");
+        return () => buyer.post(`/deals/${dealId}/offers/${counter.id}/accept`);
+      }),
+    );
+    const answers = await Promise.all(accepts.map((accept) => accept()));
+    expect(answers.map((a) => a.status).sort()).toEqual([200, 409]);
+    const { rows } = await system().query(
+      "select count(*)::int as n from deals where listing_id = $1 and stage = 'checks'",
+      [listingId],
+    );
+    expect(rows[0].n).toBe(1);
+  });
+
+  it("keeps staff's review notes from the buyer, and reads ?includeSold=false as no", async () => {
+    const seller = await signUp(app, "Emeka Ugwu");
+    const buyer = await signUp(app, "Ifeoma Nnamdi");
+    const admin = await signUp(app, "Review Staff");
+    await makeAdmin(admin);
+    const listingId = await liveListing(seller, admin);
+    await system().query("update listings set review_note = 'Seller rang twice about the fee.' where id = $1", [
+      listingId,
+    ]);
+    const dealId = (await buyer.post(`/listings/${listingId}/deals`, { amountKobo: 1_200_000_000 })).body.deal.id;
+    expect((await buyer.get(`/deals/${dealId}`)).body.listing.reviewNote).toBe("");
+    expect((await seller.get(`/deals/${dealId}`)).body.listing.reviewNote).toContain("fee");
+
+    const statuses = async (query: string) =>
+      (await buyer.get(`/listings?limit=60&${query}`)).body.listings.map((l: { status: string }) => l.status);
+    expect(await statuses("includeSold=true")).toContain("sold");
+    expect(await statuses("includeSold=false")).not.toContain("sold");
+  });
+
+  it("holds a fixed price in the deal room, and caps how many witnesses one side can name", async () => {
+    const seller = await signUp(app, "Kelechi Odo");
+    const buyer = await signUp(app, "Uche Mba");
+    const admin = await signUp(app, "Review Staff");
+    await makeAdmin(admin);
+    const listingId = await liveListing(seller, admin, { negotiable: false });
+    const dealId = (await buyer.post(`/listings/${listingId}/deals`, { amountKobo: LAND.priceKobo })).body.deal.id;
+    // No haggling inside the room either.
+    expect((await seller.post(`/deals/${dealId}/offers`, { amountKobo: LAND.priceKobo - 100 })).status).toBe(422);
+    const offer = (await seller.get(`/deals/${dealId}`)).body.offers[0].id;
+    expect((await seller.post(`/deals/${dealId}/offers/${offer}/accept`)).status).toBe(200);
+    // Name and remove, over and over: each one emails a stranger from our domain.
+    for (let i = 0; i < 10; i++) {
+      const w = await buyer.post(`/deals/${dealId}/witnesses`, {
+        fullName: `Witness ${i}`,
+        email: `w${i}@test.example`,
+      });
+      expect(w.status).toBe(201);
+      const { rows } = await system().query(
+        "select id from deal_witnesses where deal_id = $1 and removed_at is null and side = 'buyer'",
+        [dealId],
+      );
+      expect((await buyer.delete(`/deals/${dealId}/witnesses/${rows[0].id}`)).status).toBe(200);
+    }
+    const eleventh = await buyer.post(`/deals/${dealId}/witnesses`, {
+      fullName: "One More",
+      email: "more@test.example",
+    });
+    expect(eleventh.status).toBe(429);
+    // The seller's side is counted on its own.
+    expect(
+      (await seller.post(`/deals/${dealId}/witnesses`, { fullName: "Seller Witness", email: "sw@test.example" }))
+        .status,
+    ).toBe(201);
+  });
+
+  it("ends every reset link for an account once one is used", async () => {
+    const user = await signUp(app, "Obinna Okeke");
+    const { rows } = await system().query("select email from users where id = $1", [user.userId]);
+    await user.post("/auth/forgot-password", { email: rows[0].email });
+    await user.post("/auth/forgot-password", { email: rows[0].email });
+    const links = await system().query(
+      "select payload->>'token' as token from outbox where kind = 'password.reset' order by id desc limit 2",
+    );
+    const [newer, older] = links.rows.map((r) => r.token as string);
+    expect((await user.post("/auth/reset-password", { token: newer, password: "a brand new password" })).status).toBe(
+      200,
+    );
+    expect((await user.post("/auth/reset-password", { token: older, password: "an attacker's password" })).status).toBe(
+      410,
+    );
   });
 });

@@ -3,7 +3,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { asUser, type Tx } from "../db/client.ts";
 import { forbidden } from "../lib/errors.ts";
-import { parse, requireUser } from "../lib/http.ts";
+import { idParams, parse, requireUser } from "../lib/http.ts";
 import { withCovers } from "./listings.ts";
 
 async function requireAdmin(tx: Tx) {
@@ -48,6 +48,8 @@ export async function adminRoutes(app: FastifyInstance) {
       const { rows } = await tx.execute<{ id: string }>(sql`
         select l.id, l.title, l.town, l.state, l.lga, l.price_kobo::float8 as "priceKobo", l.size_value::float as "sizeValue",
                l.size_unit as "sizeUnit", l.title_kind as "titleKind", l.status, l.review_note as "reviewNote",
+               l.title_reference as "titleReference", l.title_searched_at as "titleSearchedAt",
+               l.title_search_ref as "titleSearchRef", l.title_search_note as "titleSearchNote",
                l.updated_at as "updatedAt", u.full_name as "sellerName", u.email as "sellerEmail", u.phone as "sellerPhone",
                (select count(*)::int from files f where f.listing_id = l.id and f.kind <> 'photo' and f.ready) as "papers"
         from listings l join users u on u.id = l.seller_id
@@ -55,6 +57,24 @@ export async function adminRoutes(app: FastifyInstance) {
         order by l.updated_at ${status === "in_review" ? sql`asc` : sql`desc`}
         limit 200`);
       return { listings: await withCovers(tx, app.storage, rows) };
+    });
+  });
+
+  /** Record the search of a listing's title at the State Ministry of Lands. Needed to publish. */
+  app.post("/admin/listings/:id/title-search", async (req) => {
+    const { id } = parse(idParams, req.params);
+    const body = parse(
+      z.object({
+        reference: z.string().trim().min(2, "Give the Ministry of Lands search reference.").max(120),
+        note: z.string().trim().max(1000).default(""),
+      }),
+      req.body,
+    );
+    return asAdmin(req, async (tx) => {
+      const { rows } = await tx.execute<{ at: string }>(
+        sql`select app.record_title_search(${id}, ${body.reference}, ${body.note}) as at`,
+      );
+      return { titleSearchedAt: rows[0]?.at };
     });
   });
 

@@ -42,10 +42,9 @@ export function Toaster() {
   }, []);
 
   return (
-    <div
-      aria-live="polite"
-      className="pointer-events-none fixed inset-x-0 z-[60] flex flex-col items-center gap-2 px-4 max-sm:top-0 max-sm:pt-[max(0.75rem,env(safe-area-inset-top))] sm:bottom-0 sm:pb-[max(1.25rem,env(safe-area-inset-bottom))] print:hidden"
-    >
+    // No aria-live here: each toast announces itself (role=status or alert), and a live
+    // region around them makes screen readers say everything twice.
+    <div className="pointer-events-none fixed inset-x-0 z-[60] flex flex-col items-center gap-2 px-4 max-sm:top-0 max-sm:pt-[max(0.75rem,env(safe-area-inset-top))] sm:bottom-0 sm:pb-[max(1.25rem,env(safe-area-inset-bottom))] print:hidden">
       {items.map((t) => (
         <div
           key={t.id}
@@ -80,7 +79,7 @@ export function Toaster() {
             type="button"
             onClick={() => setItems((prev) => prev.filter((x) => x.id !== t.id))}
             aria-label="Dismiss"
-            className="ml-1 grid size-6 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/10 hover:text-white"
+            className="-my-1 ml-1 grid size-9 shrink-0 place-items-center rounded-full text-white/60 hover:bg-white/10 hover:text-white"
           >
             <svg
               viewBox="0 0 12 12"

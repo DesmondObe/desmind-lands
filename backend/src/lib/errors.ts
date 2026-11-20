@@ -22,5 +22,8 @@ export function fromDatabaseError(err: unknown): HttpError | null {
   // A row still referred to elsewhere, e.g. a room with tenancy history.
   if (code === "23503" || code === "23001")
     return new HttpError(409, "This is still referred to by other records, so it cannot be removed.");
+  // Two requests raced to make the same thing (say, a double tap opening one deal twice):
+  // the second lost to a unique index. That is a conflict, not a server fault.
+  if (code === "23505") return new HttpError(409, "This was already done a moment ago. Refresh the page to see it.");
   return null;
 }

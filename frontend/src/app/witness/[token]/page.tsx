@@ -116,7 +116,7 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
 
         <div>
           {w.current ? (
-            <div className="deep-ground rounded-[2rem] p-10 text-white">
+            <div className="deep-ground rounded-4xl p-10 text-white">
               <span className="grid size-14 place-items-center rounded-full bg-brass-300 text-forest-950">
                 <Icon d={icons.check} className="size-7" />
               </span>
@@ -143,9 +143,16 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
             </div>
           ) : (
             <>
-              <div className="overflow-hidden rounded-[2rem] border border-line bg-surface shadow-soft">
+              <div className="overflow-hidden rounded-4xl border border-line bg-surface shadow-soft">
                 <p className="border-b border-line px-7 py-4 font-display text-xl text-ink">Read the agreement</p>
-                <div
+                <section
+                  // A short agreement leaves nothing to scroll: then it is read as it stands.
+                  ref={(el) => {
+                    if (el && el.scrollHeight <= el.clientHeight + 40) setRead(true);
+                  }}
+                  // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must take focus to be scrolled by keyboard.
+                  tabIndex={0}
+                  aria-label="The agreement, in full"
                   onScroll={(e) => {
                     const el = e.currentTarget;
                     if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) setRead(true);
@@ -153,24 +160,35 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
                   className="survey-grid max-h-[480px] overflow-y-auto px-7 py-8"
                 >
                   <div className="agreement">{view.deal.agreementText}</div>
-                </div>
+                </section>
               </div>
               <form
                 onSubmit={sign}
-                className="mt-6 space-y-5 rounded-[2rem] border border-line bg-surface p-7 shadow-soft"
+                className="mt-6 space-y-5 rounded-4xl border border-line bg-surface p-7 shadow-soft"
               >
                 {!read && <p className="text-sm text-earth-700">Scroll to the end of the agreement to sign.</p>}
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Your address">
-                    <Input required value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} />
+                    <Input
+                      required
+                      autoComplete="street-address"
+                      value={f.address}
+                      onChange={(e) => setF({ ...f, address: e.target.value })}
+                    />
                   </Field>
                   <Field label="Your occupation">
-                    <Input required value={f.occupation} onChange={(e) => setF({ ...f, occupation: e.target.value })} />
+                    <Input
+                      required
+                      autoComplete="organization-title"
+                      value={f.occupation}
+                      onChange={(e) => setF({ ...f, occupation: e.target.value })}
+                    />
                   </Field>
                 </div>
                 <Field label={`Type your full name to sign: ${w.fullName}`}>
                   <Input
                     required
+                    autoComplete="name"
                     disabled={!read}
                     value={f.signedName}
                     onChange={(e) => setF({ ...f, signedName: e.target.value })}
@@ -183,7 +201,7 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
                     disabled={!read}
                     checked={f.consent}
                     onChange={(e) => setF({ ...f, consent: e.target.checked })}
-                    className="mt-0.5 size-5 accent-[oklch(0.6_0.15_40)]"
+                    className="mt-0.5 size-5 accent-accent"
                   />
                   I know {party} and witness their signature to this agreement. Typing my name is my electronic
                   signature.

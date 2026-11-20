@@ -17,6 +17,15 @@ export function requireUser(req: FastifyRequest): string {
   return req.userId;
 }
 
+/**
+ * A yes/no in a query string. z.coerce.boolean() will not do: it reads any non-empty text,
+ * "false" included, as true.
+ */
+export const queryFlag = z
+  .enum(["true", "false", "1", "0", ""])
+  .default("false")
+  .transform((v) => v === "true" || v === "1");
+
 export const id = z.uuid();
 export const idParams = z.object({ id });
 export const orgParams = z.object({ orgId: id });

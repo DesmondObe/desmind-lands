@@ -100,7 +100,7 @@ export function Nav() {
               key={href}
               href={href}
               className={cx(
-                "relative rounded-full px-4 py-2 text-[14px] font-semibold transition",
+                "relative rounded-full px-3.5 py-2 text-[14px] font-semibold transition",
                 overHero
                   ? "text-white/75 hover:text-white"
                   : active(href)
@@ -115,12 +115,22 @@ export function Nav() {
                 </span>
               )}
               {active(href) && !overHero && (
-                <span className="absolute inset-x-4 -bottom-[13px] h-0.5 rounded-full bg-accent" aria-hidden="true" />
+                <span className="absolute inset-x-3.5 -bottom-[17px] h-0.5 rounded-full bg-accent" aria-hidden="true" />
               )}
             </Link>
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
+          <Link
+            href="/lands"
+            className={cx(
+              "mr-2 hidden items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold xl:flex",
+              overHero ? "bg-white/8 text-white/80 ring-1 ring-white/15" : "bg-sunken text-ink-soft ring-1 ring-line",
+            )}
+          >
+            <span className="size-1.5 animate-pulse-dot rounded-full bg-earth-500" aria-hidden="true" />
+            Now in Enugu State
+          </Link>
           <ThemeToggle light={overHero} />
           {me ? (
             <div className="hidden items-center gap-2 sm:flex">

@@ -8,7 +8,19 @@ import { PlotArt } from "@/components/plot-art";
 import { useRequireSignIn } from "@/components/session";
 import { Loading, Page } from "@/components/shell";
 import { toast } from "@/components/toast";
-import { Badge, Button, ButtonLink, Card, cx, ErrorText, Eyebrow, Icon, icons, statusTone } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  ButtonLink,
+  Card,
+  cx,
+  ErrorText,
+  Eyebrow,
+  Icon,
+  icons,
+  statusTone,
+  TitleSearchSeal,
+} from "@/components/ui";
 import { UploadZone } from "@/components/uploads";
 import { api, type Listing, openFile } from "@/lib/api";
 import { LISTING_STATUS } from "@/lib/land";
@@ -60,7 +72,11 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
     setBusy(true);
     try {
       await api(`/listings/${id}/status`, "POST", { status: next });
-      toast(next === "in_review" ? "Sent for review. We usually answer within a day." : "Listing updated");
+      toast(
+        next === "in_review"
+          ? "Sent for review. We will search the title at the Ministry of Lands, then publish it."
+          : "Listing updated",
+      );
       await load();
     } catch (err) {
       toast((err as Error).message, "error");
@@ -70,11 +86,20 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
   };
 
   const move = async (from: number, to: number) => {
+    // One move at a time: a second tap before the first lands would reorder from the old order.
+    if (busy) return;
     const ids = data.photos.map((p) => p.id);
     const [x] = ids.splice(from, 1);
     ids.splice(to, 0, x!);
-    await api(`/listings/${id}/photo-order`, "POST", { ids });
-    await load();
+    setBusy(true);
+    try {
+      await api(`/listings/${id}/photo-order`, "POST", { ids });
+      await load();
+    } catch (err) {
+      toast((err as Error).message, "error");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const remove = async (fileId: string) => {
@@ -94,8 +119,12 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
 
   return (
     <Page wide>
-      <Link href="/dashboard" className="text-sm text-ink-faint hover:text-ink">
-        ← Dashboard
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-faint hover:text-ink"
+      >
+        <Icon d={icons.arrow} className="size-3.5 rotate-180" />
+        Dashboard
       </Link>
       <div className="mt-4 flex flex-wrap items-start justify-between gap-6">
         <div className="max-w-3xl">
@@ -104,7 +133,8 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
           </Badge>
           <h1 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-5xl">{l.title}</h1>
           <p className="mt-2 text-ink-soft">
-            {l.town}, {l.state}
+            {l.town}
+            {l.lga ? `, ${l.lga}` : ""}, {l.state} State
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -136,14 +166,17 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
           {["draft", "rejected", "withdrawn"].includes(l.status) && (
             <Button
               variant="ghost"
+              busy={busy}
               onClick={async () => {
                 if (!window.confirm("Delete this listing and its files for good?")) return;
+                setBusy(true);
                 try {
                   await api(`/listings/${id}`, "DELETE");
                   toast("Listing deleted");
                   router.push("/dashboard");
                 } catch (err) {
                   toast((err as Error).message, "error");
+                  setBusy(false);
                 }
               }}
             >
@@ -152,6 +185,24 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
           )}
         </div>
       </div>
+
+      {l.titleSearchedAt ? (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-forest-200 bg-forest-50/70 px-6 py-5 dark:border-forest-300">
+          <TitleSearchSeal at={l.titleSearchedAt} />
+          {l.titleSearchRef && <span className="font-mono text-xs text-ink-soft">Ref. {l.titleSearchRef}</span>}
+        </div>
+      ) : (
+        l.status === "in_review" && (
+          <div className="mt-8 flex items-start gap-4 rounded-3xl border border-amber-100 bg-amber-50 px-6 py-5 text-amber-800">
+            <span className="mt-0.5 size-2 shrink-0 animate-pulse-dot rounded-full bg-amber-500" aria-hidden="true" />
+            <p className="text-sm leading-relaxed">
+              <strong>We are searching your title at the Enugu State Ministry of Lands.</strong> Once it checks out, we
+              publish the listing and buyers can make offers. Changing the title or the location now restarts the
+              search.
+            </p>
+          </div>
+        )
+      )}
 
       {l.status === "rejected" && l.reviewNote && (
         <div className="mt-8 rounded-3xl border border-red-100 bg-red-50 p-6 text-red-800">
@@ -207,7 +258,8 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
                       <button
                         type="button"
                         onClick={() => move(i, i - 1)}
-                        className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-forest-950"
+                        disabled={busy}
+                        className="grid size-10 place-items-center rounded-full bg-white/90 text-sm font-bold text-forest-950 disabled:opacity-60"
                         aria-label="Move earlier"
                       >
                         ←
@@ -217,7 +269,8 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
                       <button
                         type="button"
                         onClick={() => move(i, i + 1)}
-                        className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-forest-950"
+                        disabled={busy}
+                        className="grid size-10 place-items-center rounded-full bg-white/90 text-sm font-bold text-forest-950 disabled:opacity-60"
                         aria-label="Move later"
                       >
                         →
@@ -227,7 +280,7 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
                   <button
                     type="button"
                     onClick={() => remove(p.id)}
-                    className="rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-red-700"
+                    className="h-10 rounded-full bg-white/90 px-3.5 text-xs font-bold text-red-700"
                   >
                     Remove
                   </button>
@@ -262,7 +315,11 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
             {data.papers.map((p) => (
               <li key={p.id} className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3">
                 <Icon d={icons.doc} className="text-earth-600" />
-                <button type="button" onClick={() => openFile(p.id)} className="min-w-0 flex-1 text-left">
+                <button
+                  type="button"
+                  onClick={() => openFile(p.id).catch((e) => toast(e.message, "error"))}
+                  className="min-w-0 flex-1 text-left"
+                >
                   <span className="block truncate text-sm font-semibold text-ink">{p.filename}</span>
                   <span className="text-xs text-ink-faint">{PAPER_LABEL[p.kind] ?? p.kind}</span>
                 </button>
@@ -301,7 +358,11 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
         <section className="mt-16">
           <div className="mb-8 flex items-center justify-between gap-4">
             <h2 className="font-display text-3xl text-ink">Details</h2>
-            {!editing && (
+            {editing ? (
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+            ) : (
               <Button variant="secondary" onClick={() => setEditing(true)}>
                 Edit details
               </Button>

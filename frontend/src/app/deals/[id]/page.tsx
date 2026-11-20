@@ -23,7 +23,7 @@ import {
   Textarea,
 } from "@/components/ui";
 import { UploadZone } from "@/components/uploads";
-import { api, type DealStage, type Listing, openFile, type Side } from "@/lib/api";
+import { ApiError, api, type DealStage, type Listing, openFile, type Side } from "@/lib/api";
 import {
   formatDay,
   formatKobo,
@@ -129,13 +129,23 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   const { me } = useRequireSignIn();
   const [room, setRoom] = useState<Room | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; gone: boolean } | null>(null);
+  const [offline, setOffline] = useState(false);
+  const opened = useRef(false);
 
   const reload = useCallback(async () => {
     try {
       setRoom(await api<Room>(`/deals/${id}`));
+      opened.current = true;
+      setOffline(false);
+      setError(null);
     } catch (err) {
-      setError((err as Error).message);
+      const status = err instanceof ApiError ? err.status : 0;
+      const gone = status === 403 || status === 404;
+      // Once the room is open, a dropped connection or a slow server is not the end of the
+      // deal: keep what is on screen, say so, and let the next look (20 s) put it right.
+      if (opened.current && !gone && status !== 401) setOffline(true);
+      else setError({ message: (err as Error).message, gone });
     }
   }, [id]);
   useEffect(() => {
@@ -153,11 +163,23 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
     return (
       <Page>
         <div className="mx-auto max-w-md py-16 text-center">
-          <p className="font-display text-3xl">Deal not found</p>
-          <p className="mt-3 text-ink-soft">{error}</p>
-          <ButtonLink href="/dashboard" className="mt-8">
-            Back to the dashboard
-          </ButtonLink>
+          <p className="font-display text-3xl">{error.gone ? "Deal not found" : "The deal room did not open"}</p>
+          <p className="mt-3 text-ink-soft">{error.message}</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {!error.gone && (
+              <Button
+                onClick={() => {
+                  setError(null);
+                  void reload();
+                }}
+              >
+                Try again
+              </Button>
+            )}
+            <ButtonLink href="/dashboard" variant={error.gone ? "primary" : "secondary"}>
+              Back to the dashboard
+            </ButtonLink>
+          </div>
         </div>
       </Page>
     );
@@ -168,6 +190,14 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
   const d = room.deal;
   const stageIdx = STAGES.findIndex((s) => s.key === d.stage);
   const other = side === "seller" ? room.buyer : room.seller;
+  const stageView = (
+    <>
+      {d.stage === "negotiating" && <Negotiation {...ctx} />}
+      {d.stage === "checks" && <Checks {...ctx} />}
+      {d.stage === "agreement" && <Agreement {...ctx} />}
+      {d.stage === "payment" && <PaymentStage {...ctx} />}
+    </>
+  );
 
   return (
     <>
@@ -216,7 +246,7 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
                 const done = i < stageIdx || d.stage === "completed";
                 const now = i === stageIdx && d.stage !== "completed";
                 return (
-                  <li key={s.key}>
+                  <li key={s.key} aria-current={now ? "step" : undefined}>
                     <div
                       className={cx(
                         "h-1.5 rounded-full",
@@ -226,6 +256,7 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
                     <p className={cx("mt-3 text-[13px] font-semibold", done || now ? "text-white" : "text-white/40")}>
                       <span className="hidden sm:inline">{s.long}</span>
                       <span className="sm:hidden">{s.label}</span>
+                      <span className="sr-only">{done ? " (done)" : now ? " (current step)" : " (to come)"}</span>
                     </p>
                   </li>
                 );
@@ -240,6 +271,15 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
       </section>
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        {offline && (
+          <p
+            role="status"
+            className="mb-4 flex items-center gap-2.5 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            <span className="size-2 shrink-0 animate-pulse-dot rounded-full bg-amber-500" aria-hidden="true" />
+            Connection lost. What you see may be a little out of date; reconnecting…
+          </p>
+        )}
         {room.nextStep.text && (
           <div
             className={cx(
@@ -268,10 +308,19 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">
           <div className="min-w-0 space-y-8">
-            {d.stage === "negotiating" && <Negotiation {...ctx} />}
-            {d.stage === "checks" && <Checks {...ctx} />}
-            {d.stage === "agreement" && <Agreement {...ctx} />}
-            {d.stage === "payment" && <PaymentStage {...ctx} />}
+            {room.role === "admin" ? (
+              // Staff see the room as the seller does, but the deal is not theirs to move: a
+              // disabled fieldset switches off every button and field inside it at once.
+              <fieldset disabled className="m-0 min-w-0 space-y-8 border-0 p-0">
+                <p className="rounded-2xl border border-line bg-sunken px-4 py-3 text-sm text-ink-soft">
+                  <strong className="font-semibold text-ink">Staff view.</strong> You can read this deal, its papers and
+                  its record. Only the seller and the buyer can act in it.
+                </p>
+                {stageView}
+              </fieldset>
+            ) : (
+              stageView
+            )}
             {d.stage === "completed" && <Completed {...ctx} />}
             {d.stage === "cancelled" && (
               <Card>
@@ -362,13 +411,14 @@ function Negotiation({ room, reload, me }: Ctx) {
                 <Button
                   variant="secondary"
                   busy={busy === "withdraw"}
-                  onClick={() =>
-                    act(
-                      "withdraw",
-                      () => api(`/deals/${room.deal.id}/offers/${open.id}/withdraw`, "POST"),
-                      "Offer withdrawn",
-                    )
-                  }
+                  onClick={() => {
+                    if (window.confirm(`Withdraw your offer of ${formatKobo(open.amountKobo)}?`))
+                      void act(
+                        "withdraw",
+                        () => api(`/deals/${room.deal.id}/offers/${open.id}/withdraw`, "POST"),
+                        "Offer withdrawn",
+                      );
+                  }}
                 >
                   Withdraw my offer
                 </Button>
@@ -380,7 +430,7 @@ function Negotiation({ room, reload, me }: Ctx) {
                     onClick={() => {
                       if (
                         window.confirm(
-                          `Accept ${formatKobo(open.amountKobo)}? The land goes under offer to this buyer.`,
+                          `Accept ${formatKobo(open.amountKobo)}? The land goes under offer to ${me === "seller" ? "this buyer" : "you"}, and other buyers' offers wait.`,
                         )
                       )
                         void act(
@@ -395,9 +445,14 @@ function Negotiation({ room, reload, me }: Ctx) {
                   <Button
                     variant="secondary"
                     busy={busy === "decline"}
-                    onClick={() =>
-                      act("decline", () => api(`/deals/${room.deal.id}/offers/${open.id}/decline`, "POST"), "Declined")
-                    }
+                    onClick={() => {
+                      if (window.confirm(`Decline the offer of ${formatKobo(open.amountKobo)}?`))
+                        void act(
+                          "decline",
+                          () => api(`/deals/${room.deal.id}/offers/${open.id}/decline`, "POST"),
+                          "Declined",
+                        );
+                    }}
                   >
                     Decline
                   </Button>
@@ -406,7 +461,37 @@ function Negotiation({ room, reload, me }: Ctx) {
             </div>
           </div>
         ) : (
-          <p className="mt-4 text-ink-soft">No offer is on the table. Make one below.</p>
+          <div className="mt-4">
+            {room.listing.negotiable ? (
+              <p className="text-ink-soft">No offer is on the table. Make one below.</p>
+            ) : (
+              <>
+                <p className="text-ink-soft">
+                  No offer is on the table. The seller has fixed the price at{" "}
+                  <strong className="text-ink">{formatKobo(room.listing.priceKobo)}</strong>.
+                </p>
+                {room.role === "buyer" && (
+                  <Button
+                    className="mt-4"
+                    busy={busy === "counter"}
+                    onClick={() =>
+                      act(
+                        "counter",
+                        () =>
+                          api(`/deals/${room.deal.id}/offers`, "POST", {
+                            amountKobo: room.listing.priceKobo,
+                            note: "",
+                          }),
+                        "Offer sent",
+                      )
+                    }
+                  >
+                    Offer the asking price
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         )}
 
         {room.listing.negotiable && (
@@ -472,17 +557,42 @@ function Negotiation({ room, reload, me }: Ctx) {
 
 // --- Checks --------------------------------------------------------------------------------
 
+/**
+ * A form over values that live on the server and may change under it. Only what the user has
+ * typed is kept here; every other field shows the server's latest. Without this, a form copied
+ * once at mount goes stale, and saving it writes old values over the other party's new ones.
+ */
+function useDraft<T extends Record<string, string>>(saved: T) {
+  const [typed, setTyped] = useState<Partial<T>>({});
+  const value = { ...saved, ...typed } as T;
+  const set = (next: T) => {
+    const changed: Partial<T> = {};
+    for (const k of Object.keys(next) as (keyof T)[]) if (next[k] !== saved[k]) changed[k] = next[k];
+    setTyped(changed);
+  };
+  /** After a save: these fields are the server's again. */
+  const clear = (...keys: (keyof T)[]) =>
+    setTyped((t) => {
+      const rest = { ...t };
+      for (const k of keys) delete rest[k];
+      return rest;
+    });
+  return [value, set, clear] as const;
+}
+
 function Checks({ room, reload, me }: Ctx) {
   const { busy, act } = useAct(reload);
   const d = room.deal;
   const patch = (key: string, body: object, done = "Saved") =>
     act(key, () => api(`/deals/${d.id}/terms`, "PATCH", body), done);
-  const [bank, setBank] = useState({
+  // The room is looked at again every 20 seconds, and the other party edits these too. A field
+  // you have not touched follows what is saved; one you have typed in keeps what you typed.
+  const [bank, setBank, bankSaved] = useDraft({
     bankName: d.bankName,
     bankAccountNumber: d.bankAccountNumber,
     bankAccountName: d.bankAccountName,
   });
-  const [terms, setTerms] = useState({
+  const [terms, setTerms, termsSaved] = useDraft({
     completionDate: d.completionDate ?? "",
     specialTerms: d.specialTerms,
     inspectionAt: d.inspectionAt ? toLocalInput(d.inspectionAt) : "",
@@ -509,11 +619,13 @@ function Checks({ room, reload, me }: Ctx) {
             <div className="mt-4 space-y-3">
               <Input
                 type="datetime-local"
+                aria-label="Inspection date and time"
                 value={terms.inspectionAt}
                 onChange={(e) => setTerms({ ...terms, inspectionAt: e.target.value })}
               />
               <Input
                 placeholder="Where to meet, who comes"
+                aria-label="Where to meet, and who comes"
                 value={terms.inspectionNote}
                 onChange={(e) => setTerms({ ...terms, inspectionNote: e.target.value })}
               />
@@ -529,7 +641,7 @@ function Checks({ room, reload, me }: Ctx) {
                       inspectionNote: terms.inspectionNote,
                     },
                     "Inspection saved",
-                  )
+                  ).then((ok) => ok && termsSaved("inspectionAt", "inspectionNote"))
                 }
               >
                 Save inspection
@@ -592,6 +704,7 @@ function Checks({ room, reload, me }: Ctx) {
                 <button
                   type="button"
                   disabled={me !== "buyer" || busy === c.key}
+                  aria-pressed={on}
                   onClick={() => patch(c.key, { checklist: { [c.key]: !on } }, on ? "Unticked" : "Ticked")}
                   className={cx(
                     "flex w-full items-center gap-4 rounded-2xl border px-4 py-3.5 text-left transition",
@@ -614,8 +727,9 @@ function Checks({ room, reload, me }: Ctx) {
           })}
         </ul>
         <p className="mt-4 text-xs leading-relaxed text-ink-faint">
-          DesMind Lands does not verify title for you. A registry search and a surveyor's charting are the surest ways
-          to avoid land that is under government acquisition or sold twice.
+          DesMind Lands searched this title at the Ministry of Lands before listing; the reference is on the listing. A
+          search is not a guarantee: a surveyor&apos;s charting and your own lawyer are the surest ways to avoid land
+          under government acquisition or sold twice.
         </p>
       </Card>
 
@@ -653,7 +767,11 @@ function Checks({ room, reload, me }: Ctx) {
               className="mt-4"
               size="sm"
               busy={busy === "bank"}
-              onClick={() => patch("bank", bank, "Account saved")}
+              onClick={() =>
+                patch("bank", bank, "Account saved").then(
+                  (ok) => ok && bankSaved("bankName", "bankAccountNumber", "bankAccountName"),
+                )
+              }
             >
               Save account
             </Button>
@@ -696,7 +814,7 @@ function Checks({ room, reload, me }: Ctx) {
               "terms",
               { completionDate: terms.completionDate || null, specialTerms: terms.specialTerms },
               "Terms saved",
-            )
+            ).then((ok) => ok && termsSaved("completionDate", "specialTerms"))
           }
         >
           Save terms
@@ -706,7 +824,7 @@ function Checks({ room, reload, me }: Ctx) {
       <Witnesses room={room} reload={reload} me={me} />
 
       {me === "buyer" && (
-        <div className="deep-ground rounded-[2rem] p-8 text-white">
+        <div className="deep-ground rounded-4xl p-8 text-white">
           <h3 className="font-display text-3xl">Satisfied with your checks?</h3>
           <p className="mt-2 max-w-xl text-white/70">
             Preparing the agreement writes out the Contract of Sale with everything above. Both of you, and your
@@ -752,6 +870,12 @@ function BankCard({ d }: { d: Room["deal"] }) {
 
 // --- Witnesses -----------------------------------------------------------------------------
 
+/** A Nigerian number as wa.me wants it: digits only, with the country code (0803… → 234803…). */
+function whatsappNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  return digits.startsWith("0") ? `234${digits.slice(1)}` : digits;
+}
+
 function Witnesses({ room, reload, me }: Ctx) {
   const { busy, act } = useAct(reload);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "" });
@@ -763,15 +887,15 @@ function Witnesses({ room, reload, me }: Ctx) {
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    try {
-      const r = await api<{ link: string }>(`/deals/${room.deal.id}/witnesses`, "POST", form);
-      setLink({ name: form.fullName, url: r.link, phone: form.phone });
+    // A second tap while the first is on its way would name, and email, the witness twice.
+    if (busy) return;
+    const sent = form;
+    await act("add", async () => {
+      const r = await api<{ link: string }>(`/deals/${room.deal.id}/witnesses`, "POST", sent);
+      setLink({ name: sent.fullName, url: r.link, phone: sent.phone });
       setForm({ fullName: "", email: "", phone: "" });
-      toast(form.email ? "Witness added and emailed" : "Witness added. Send them the link.");
-      await reload();
-    } catch (err) {
-      toast((err as Error).message, "error");
-    }
+      toast(sent.email ? "Witness added and emailed" : "Witness added. Send them the link.");
+    });
   }
 
   return (
@@ -816,33 +940,41 @@ function Witnesses({ room, reload, me }: Ctx) {
                           <div className="mt-1.5 flex gap-3 text-xs font-semibold">
                             <button
                               type="button"
-                              className="text-forest-700"
-                              onClick={async () => {
-                                try {
+                              disabled={busy !== null}
+                              className="-m-2 p-2 text-forest-700 disabled:opacity-50"
+                              onClick={() => {
+                                if (
+                                  !window.confirm(
+                                    `Make a new link for ${w.fullName}? Any link you already sent them will stop working.`,
+                                  )
+                                )
+                                  return;
+                                void act(`link${w.id}`, async () => {
                                   const r = await api<{ link: string }>(
                                     `/deals/${room.deal.id}/witnesses/${w.id}/link`,
                                     "POST",
                                   );
                                   setLink({ name: w.fullName, url: r.link, phone: w.phone });
-                                } catch (err) {
-                                  toast((err as Error).message, "error");
-                                }
+                                });
                               }}
                             >
-                              New link
+                              {busy === `link${w.id}` ? "Making…" : "New link"}
                             </button>
                             <button
                               type="button"
-                              className="text-ink-faint hover:text-red-700"
-                              onClick={() =>
-                                act(
+                              disabled={busy !== null}
+                              className="-m-2 p-2 text-ink-faint hover:text-red-700 disabled:opacity-50"
+                              onClick={() => {
+                                if (!window.confirm(`Remove ${w.fullName} as a witness? Their link will stop working.`))
+                                  return;
+                                void act(
                                   w.id,
                                   () => api(`/deals/${room.deal.id}/witnesses/${w.id}`, "DELETE"),
                                   "Witness removed",
-                                )
-                              }
+                                );
+                              }}
                             >
-                              Remove
+                              {busy === w.id ? "Removing…" : "Remove"}
                             </button>
                           </div>
                         )}
@@ -870,8 +1002,12 @@ function Witnesses({ room, reload, me }: Ctx) {
               size="sm"
               variant="secondary"
               onClick={async () => {
-                await navigator.clipboard.writeText(link.url);
-                toast("Link copied");
+                try {
+                  await navigator.clipboard.writeText(link.url);
+                  toast("Link copied");
+                } catch {
+                  toast("Could not copy. Press and hold the link above to copy it.", "error");
+                }
               }}
             >
               <Icon d={icons.link} className="size-4" />
@@ -879,7 +1015,7 @@ function Witnesses({ room, reload, me }: Ctx) {
             </Button>
             <a
               className="inline-flex h-9 items-center gap-2 rounded-full bg-[#1f9d55] px-4 text-[13px] font-semibold text-white"
-              href={`https://wa.me/${link.phone}?text=${encodeURIComponent(share(link.name, link.url))}`}
+              href={`https://wa.me/${whatsappNumber(link.phone)}?text=${encodeURIComponent(share(link.name, link.url))}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -898,15 +1034,31 @@ function Witnesses({ room, reload, me }: Ctx) {
           className="mt-6 grid gap-3 border-t border-line pt-6 sm:grid-cols-[1.3fr_1.3fr_1fr_auto] sm:items-end"
         >
           <Field label="Witness's full name">
-            <Input required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+            {/* autoComplete off: the browser would offer the user's own name, email and phone. */}
+            <Input
+              required
+              autoComplete="off"
+              value={form.fullName}
+              onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+            />
           </Field>
           <Field label="Email">
-            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <Input
+              type="email"
+              autoComplete="off"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
           </Field>
           <Field label="Phone">
-            <Input type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <Input
+              type="tel"
+              autoComplete="off"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
           </Field>
-          <Button type="submit" className="h-[50px]">
+          <Button type="submit" busy={busy === "add"} className="h-[50px]">
             Add
           </Button>
         </form>
@@ -959,7 +1111,14 @@ function Agreement({ room, reload, me }: Ctx) {
   const [name, setName] = useState("");
   const [consent, setConsent] = useState(false);
   const [read, setRead] = useState(false);
-  const scroller = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLElement>(null);
+  // "Read to the end" is measured by scrolling. A short agreement, or a tall screen, leaves
+  // nothing to scroll, and nobody could ever sign: then it has been read as it stands.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: measure again when the text changes.
+  useEffect(() => {
+    const el = scroller.current;
+    if (el && el.scrollHeight <= el.clientHeight + 40) setRead(true);
+  }, [room.deal.agreementText]);
 
   const status = (["seller", "buyer"] as const).map((side) => ({
     side,
@@ -1008,16 +1167,20 @@ function Agreement({ room, reload, me }: Ctx) {
             PDF
           </a>
         </div>
-        <div
+        <section
           ref={scroller}
           onScroll={(e) => {
             const el = e.currentTarget;
             if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) setRead(true);
           }}
+          // Focusable, so the keyboard can scroll it too.
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must take focus to be scrolled by keyboard.
+          tabIndex={0}
+          aria-label="The agreement, in full"
           className="survey-grid max-h-[520px] overflow-y-auto px-7 py-8 sm:px-12"
         >
           <div className="agreement mx-auto max-w-2xl">{room.deal.agreementText}</div>
-        </div>
+        </section>
 
         {room.role !== "admin" &&
           (mine ? (
@@ -1063,7 +1226,7 @@ function Agreement({ room, reload, me }: Ctx) {
                   checked={consent}
                   disabled={!read}
                   onChange={(e) => setConsent(e.target.checked)}
-                  className="mt-0.5 size-5 accent-[oklch(0.6_0.15_40)]"
+                  className="mt-0.5 size-5 accent-accent"
                 />
                 I have read this agreement and agree to it. Typing my name is my electronic signature (Evidence Act
                 2011, s. 93).
@@ -1110,7 +1273,7 @@ function PaymentStage({ room, reload, me }: Ctx) {
   const { busy, act } = useAct(reload);
   const d = room.deal;
   const agreed = d.agreedKobo ?? 0;
-  const pct = Math.min(100, Math.round((room.confirmedKobo / agreed) * 100));
+  const pct = agreed ? Math.min(100, Math.round((room.confirmedKobo / agreed) * 100)) : 0;
   const pending = room.payments.filter((p) => p.status === "submitted").reduce((n, p) => n + p.amountKobo, 0);
 
   return (
@@ -1179,6 +1342,7 @@ function PaymentStage({ room, reload, me }: Ctx) {
                     <Button
                       size="sm"
                       variant="secondary"
+                      busy={busy === `d${p.id}`}
                       onClick={() => {
                         const note = window.prompt("What is wrong with this payment?");
                         if (note)
@@ -1213,7 +1377,7 @@ function PaymentStage({ room, reload, me }: Ctx) {
       {me === "buyer" && !d.paidAt && room.role !== "admin" && <RecordPayment room={room} reload={reload} me={me} />}
 
       {d.paidAt && (
-        <div className="deep-ground rounded-[2rem] p-8 text-white">
+        <div className="deep-ground rounded-4xl p-8 text-white">
           <Eyebrow light>Handover</Eyebrow>
           <h3 className="mt-4 font-display text-3xl">Paid in full. Now the land changes hands.</h3>
           <ul className="mt-5 space-y-2 text-white/75">
@@ -1268,9 +1432,12 @@ function PaymentStage({ room, reload, me }: Ctx) {
 
 function RecordPayment({ room, reload }: Ctx) {
   const today = new Date().toISOString().slice(0, 10);
-  const remaining = (room.deal.agreedKobo ?? 0) - room.confirmedKobo;
+  // What is still to pay, less what the seller has yet to confirm: offering the whole balance
+  // again after a payment is recorded invites the same payment being entered twice.
+  const awaiting = room.payments.filter((p) => p.status === "submitted").reduce((n, p) => n + p.amountKobo, 0);
+  const remaining = Math.max(0, (room.deal.agreedKobo ?? 0) - room.confirmedKobo - awaiting);
   const [f, setF] = useState({
-    amount: String(remaining / 100),
+    amount: remaining ? String(remaining / 100) : "",
     method: "transfer",
     reference: "",
     paidOn: today,
@@ -1278,6 +1445,7 @@ function RecordPayment({ room, reload }: Ctx) {
     signedName: "",
   });
   const [proof, setProof] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const kobo = nairaToKobo(f.amount);
@@ -1299,7 +1467,7 @@ function RecordPayment({ room, reload }: Ctx) {
       });
       toast("Payment recorded. The seller has been asked to confirm it.");
       setProof(null);
-      setF({ ...f, reference: "", note: "", signedName: "" });
+      setF({ ...f, amount: "", reference: "", note: "", signedName: "" });
       await reload();
     } catch (err) {
       setError((err as Error).message);
@@ -1342,8 +1510,9 @@ function RecordPayment({ room, reload }: Ctx) {
             accept="image/*,application/pdf"
             label={proof ? "Replace receipt" : "Attach receipt"}
             onDone={(ids) => setProof(ids[0] ?? null)}
+            onBusyChange={setUploading}
           />
-          {proof && <span className="text-sm text-forest-700">✓ Receipt attached</span>}
+          {proof && !uploading && <span className="text-sm text-forest-700">✓ Receipt attached</span>}
         </div>
         <Field
           label={`Sign with your full name: ${room.buyer.fullName}`}
@@ -1356,8 +1525,9 @@ function RecordPayment({ room, reload }: Ctx) {
           />
         </Field>
         <ErrorText error={error} />
-        <Button type="submit" variant="earth" busy={busy}>
-          Record payment
+        {/* Not while the receipt is still on its way up: the payment would go in without it. */}
+        <Button type="submit" variant="earth" busy={busy} disabled={uploading}>
+          {uploading ? "Waiting for the receipt…" : "Record payment"}
         </Button>
       </form>
     </Card>
@@ -1367,7 +1537,7 @@ function RecordPayment({ room, reload }: Ctx) {
 function Completed({ room }: Ctx) {
   const saved = (room.deal.agreedKobo ?? 0) * 0.1;
   return (
-    <div className="deep-ground relative overflow-hidden rounded-[2rem] p-10 text-white">
+    <div className="deep-ground relative overflow-hidden rounded-4xl p-10 text-white">
       <div className="absolute inset-y-0 right-0 w-1/2 opacity-40" aria-hidden="true">
         <PlotArt seed={room.listing.id} landUse={room.listing.landUse} animate />
         <div className="absolute inset-0 bg-gradient-to-r from-[var(--deep)] to-transparent" />
@@ -1402,12 +1572,14 @@ function Completed({ room }: Ctx) {
 function Conversation({ room, reload, me }: Ctx) {
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
-  const end = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLDivElement>(null);
   const myId = me === "seller" ? room.seller.id : room.buyer.id;
   const closed = ["completed", "cancelled"].includes(room.deal.stage) || room.role === "admin";
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll on new messages.
   useEffect(() => {
-    end.current?.scrollIntoView({ block: "nearest" });
+    // The box only: scrollIntoView would drag the whole page down to the chat on a phone,
+    // on opening the room and again with every new message.
+    if (box.current) box.current.scrollTop = box.current.scrollHeight;
   }, [room.messages.length]);
 
   return (
@@ -1416,7 +1588,7 @@ function Conversation({ room, reload, me }: Ctx) {
         <Icon d={icons.chat} className="text-earth-600" />
         Conversation
       </p>
-      <div className="max-h-96 space-y-3 overflow-y-auto px-5 py-4">
+      <div ref={box} className="max-h-96 space-y-3 overflow-y-auto px-5 py-4">
         {room.messages.length === 0 && (
           <p className="text-sm text-ink-faint">Messages between you stay here, on record.</p>
         )}
@@ -1440,7 +1612,6 @@ function Conversation({ room, reload, me }: Ctx) {
             </div>
           );
         })}
-        <div ref={end} />
       </div>
       {!closed && (
         <form
@@ -1464,6 +1635,8 @@ function Conversation({ room, reload, me }: Ctx) {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             placeholder="Write a message"
+            aria-label="Message"
+            autoComplete="off"
             className="min-w-0 flex-1 rounded-full bg-sunken px-4 text-sm outline-none focus:ring-2 focus:ring-forest-200"
           />
           <Button type="submit" size="sm" busy={busy} className="h-10">

@@ -14,6 +14,7 @@ export function UploadZone({
   label,
   hint,
   onDone,
+  onBusyChange,
   compact,
 }: {
   target: { listingId?: string; dealId?: string };
@@ -23,6 +24,8 @@ export function UploadZone({
   label: string;
   hint?: string;
   onDone: (ids: string[]) => void;
+  /** Told when uploading starts and ends, so a form can wait for its file before it is sent. */
+  onBusyChange?: (busy: boolean) => void;
   compact?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
@@ -32,6 +35,7 @@ export function UploadZone({
   async function send(files: FileList | null) {
     if (!files?.length) return;
     const ids: string[] = [];
+    onBusyChange?.(true);
     for (const [i, file] of [...files].entries()) {
       setBusy(files.length > 1 ? `Uploading ${i + 1} of ${files.length}…` : "Uploading…");
       try {
@@ -41,6 +45,7 @@ export function UploadZone({
       }
     }
     setBusy(null);
+    onBusyChange?.(false);
     if (ids.length) {
       toast(ids.length > 1 ? `${ids.length} files added` : "File added");
       onDone(ids);

@@ -111,10 +111,10 @@ const land = [
   [
     sellers.bola,
     {
-      title: "Half plot in a gated estate, Ibeju-Lekki",
-      state: "Lagos",
-      lga: "Ibeju-Lekki",
-      town: "Eleko",
+      title: "Half plot in a gated estate, Independence Layout",
+      state: "Enugu",
+      lga: "Enugu North",
+      town: "Independence Layout",
       sizeValue: 300,
       sizeUnit: "sqm",
       priceKobo: 900_000_000,
@@ -122,16 +122,16 @@ const land = [
       titleKind: "gazette",
       features: ["gated_estate", "dry_land", "survey_done", "near_express"],
       description:
-        "300 m² in a gated estate five minutes from the Lekki–Epe expressway. Excised and gazetted; estate roads are graded.",
+        "300 m² in a gated estate five minutes from the Enugu–Port Harcourt expressway. Gazetted; estate roads are graded.",
     },
   ],
   [
     sellers.bola,
     {
-      title: "Commercial frontage on the Abeokuta road",
-      state: "Ogun",
-      lga: "Ifo",
-      town: "Ifo",
+      title: "Commercial frontage on the Enugu–Onitsha road",
+      state: "Enugu",
+      lga: "Udi",
+      town: "Ngwo",
       sizeValue: 1200,
       sizeUnit: "sqm",
       priceKobo: 4_500_000_000,
@@ -139,16 +139,16 @@ const land = [
       landUse: "commercial",
       titleKind: "deed_of_assignment",
       features: ["tarred_road", "electricity", "road_access"],
-      description: "1,200 m² fronting the main Abeokuta road. Ideal for a filling station, warehouse or shops.",
+      description: "1,200 m² fronting the main Enugu–Onitsha road. Ideal for a filling station, warehouse or shops.",
     },
   ],
   [
     sellers.musa,
     {
-      title: "Five acres of farmland by the river, Kuje",
-      state: "Abuja (FCT)",
-      lga: "Kuje",
-      town: "Gaube",
+      title: "Five acres of farmland by the river, Adani",
+      state: "Enugu",
+      lga: "Uzo-Uwani",
+      town: "Adani",
       sizeValue: 5,
       sizeUnit: "acre",
       priceKobo: 1_750_000_000,
@@ -156,23 +156,23 @@ const land = [
       titleKind: "customary_right",
       features: ["water", "road_access", "no_family_claims"],
       description:
-        "Fertile, well-drained farmland with river frontage and a laterite road to the village. Currently under maize.",
+        "Fertile, well-drained farmland with river frontage on the Anambra and a laterite road to the village. Currently under rice.",
     },
   ],
   [
     sellers.musa,
     {
-      title: "Two hectares for a factory, Kano–Zaria road",
-      state: "Kano",
-      lga: "Kumbotso",
-      town: "Challawa",
+      title: "Two hectares for a factory, Emene industrial layout",
+      state: "Enugu",
+      lga: "Enugu East",
+      town: "Emene",
       sizeValue: 2,
       sizeUnit: "hectare",
       priceKobo: 12_000_000_000,
       landUse: "industrial",
       titleKind: "c_of_o",
       features: ["tarred_road", "electricity", "fenced"],
-      description: "Level industrial land near the Challawa industrial estate, with a three-phase line along the road.",
+      description: "Level industrial land in the Emene industrial layout, with a three-phase line along the road.",
     },
   ],
 ] as const;
@@ -187,6 +187,10 @@ if (existing[0].n > 0) {
     const { data } = await call(cookie, "POST", "/listings", body);
     await photo(cookie, data.listing.id);
     await call(cookie, "POST", `/listings/${data.listing.id}/status`, { status: "in_review" });
+    await call(admin, "POST", `/admin/listings/${data.listing.id}/title-search`, {
+      reference: `ENS/MLS/DEMO/${data.listing.id.slice(-6).toUpperCase()}`,
+      note: "Demo search: title on record in the seller's name, no encumbrance found.",
+    });
     await call(admin, "POST", `/listings/${data.listing.id}/status`, { status: "published" });
   }
   // The demo photo is a single pixel: drop it, so cards show their survey plans instead.

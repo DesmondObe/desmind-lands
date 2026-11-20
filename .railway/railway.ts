@@ -5,7 +5,7 @@ import { defineRailway, github, project, service } from "railway/iac";
 export const partial = "desmind-lands";
 export default defineRailway(() => {
   const desmindLands = service("desmind-lands", {
-    source: github("DesmondObe/lands-platform", { branch: "main", checkSuites: false }),
+    source: github("DesmondObe/desmind-lands", { branch: "main", checkSuites: false }),
     build: { buildCommand: "npm ci --include=dev && npm run build --workspace @lands/backend && npm run build --workspace @lands/frontend", buildEnvironment: "V3", builder: "RAILPACK" },
     start: "node scripts/start.mjs",
     healthcheck: "/",

@@ -19,7 +19,9 @@ function ResetForm() {
     if (!token) return setValid(false);
     api<{ valid: boolean }>(`/auth/reset-password/${encodeURIComponent(token)}`).then(
       (r) => setValid(r.valid),
-      () => setValid(false),
+      // The check itself failed (no connection, say): that is not an expired link. Show the
+      // form; sending it gives the true answer.
+      () => setValid(true),
     );
   }, [token]);
 

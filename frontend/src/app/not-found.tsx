@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui";
 export default function NotFound() {
   return (
     <div className="mx-auto grid max-w-5xl items-center gap-10 px-4 pt-36 sm:px-6 md:grid-cols-2">
-      <div className="aspect-[4/3] overflow-hidden rounded-[2rem]">
+      <div className="aspect-[4/3] overflow-hidden rounded-4xl">
         <PlotArt seed="nowhere-404" landUse="mixed" animate />
       </div>
       <div>

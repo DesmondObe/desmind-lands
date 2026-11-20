@@ -5,7 +5,7 @@ import { z } from "zod";
 import { asUser } from "../db/client.ts";
 import { files, listings } from "../db/schema.ts";
 import { forbidden, HttpError, notFound } from "../lib/errors.ts";
-import { id, idParams, parse, requireUser } from "../lib/http.ts";
+import { id, idParams, parse, queryFlag, requireUser } from "../lib/http.ts";
 import { disposition, type LocalStorage } from "../lib/storage.ts";
 
 const MB = 1024 * 1024;
@@ -127,7 +127,7 @@ export async function fileRoutes(app: FastifyInstance) {
   /** A short-lived link to open or download a file the viewer may see. */
   app.get("/files/:id/url", async (req) => {
     const { id: fileId } = parse(idParams, req.params);
-    const { download } = parse(z.object({ download: z.coerce.boolean().default(false) }), req.query);
+    const { download } = parse(z.object({ download: queryFlag }), req.query);
     return asUser(app.db, req.userId, async (tx) => {
       const [f] = await tx
         .select()

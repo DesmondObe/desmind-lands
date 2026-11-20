@@ -21,7 +21,7 @@ export default function SellPage() {
             List it once. <span className="text-earth-600 italic">Keep it all.</span>
           </>
         }
-        subtitle="Tell buyers about the land. Next you add photos and your title papers, then send it to us for review. Listing is free."
+        subtitle="Land in Enugu State, for now. Tell buyers about it, add photos and your title papers, then send it to us: we search the title at the Enugu State Ministry of Lands and publish it. Listing is free."
       />
       <ListingForm
         submitLabel="Save and add photos"

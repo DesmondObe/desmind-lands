@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CardSkeleton, ListingCard } from "@/components/listing-card";
 import { PlotArt } from "@/components/plot-art";
-import { Button, ButtonLink, cx, Eyebrow, Icon, icons } from "@/components/ui";
+import { Button, ButtonLink, cx, Eyebrow, Icon, icons, TitleSearchSeal } from "@/components/ui";
 import { api, type ListingCard as Card } from "@/lib/api";
-import { formatKobo, STATES } from "@/lib/land";
+import { formatKobo, HOME_LGAS, POPULAR_AREAS } from "@/lib/land";
 
 const STEPS = [
   {
@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "02",
     title: "Inspect and verify",
-    body: "The buyer visits the land, searches the title and sees your papers. You give the account to be paid into.",
+    body: "We searched the title at the Ministry of Lands before listing. The buyer visits the land and sees your papers; you give the account to be paid into.",
     icon: icons.search,
   },
   {
@@ -49,7 +49,7 @@ export default function Home() {
     null,
   );
   const [q, setQ] = useState("");
-  const [state, setState] = useState("");
+  const [lga, setLga] = useState("");
 
   useEffect(() => {
     api<{ listings: Card[] }>("/listings?limit=6").then(
@@ -63,7 +63,7 @@ export default function Home() {
     e.preventDefault();
     const p = new URLSearchParams();
     if (q.trim()) p.set("q", q.trim());
-    if (state) p.set("state", state);
+    if (lga) p.set("lga", lga);
     router.push(`/lands${p.size ? `?${p}` : ""}`);
   };
 
@@ -75,20 +75,21 @@ export default function Home() {
         <Contours />
         <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pt-36 pb-24 sm:px-6 lg:grid-cols-[1.15fr_1fr] lg:pt-44 lg:pb-32">
           <div className="animate-rise">
-            <Eyebrow light>Land, direct from the owner</Eyebrow>
+            <Eyebrow light>Enugu State · land, direct from the owner</Eyebrow>
             <h1 className="mt-6 font-display text-[3.1rem] leading-[0.98] font-light tracking-[-0.02em] sm:text-7xl lg:text-[5.4rem]">
               Sell your land.
               <br />
               <span className="text-brass-300 italic">Keep every naira.</span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/75">
-              Agents take 5–10% from the seller <em>and</em> the buyer. Here, you deal with each other directly, with
-              witnesses, a signed agreement and every payment on record.
+              Agents take 5–10% from the seller <em>and</em> the buyer. Here you deal with each other directly, on land
+              whose title we have searched at the Enugu State Ministry of Lands, with witnesses and every payment on
+              record.
             </p>
 
             <form
               onSubmit={search}
-              className="mt-10 flex max-w-xl flex-col gap-2 rounded-[1.75rem] bg-white p-2 shadow-lift sm:flex-row sm:rounded-full"
+              className="mt-10 flex max-w-xl flex-col gap-2 rounded-3xl bg-white p-2 shadow-lift sm:flex-row sm:rounded-full"
             >
               <label className="flex flex-1 items-center gap-3 px-4 text-forest-950">
                 <Icon d={icons.search} className="size-5 text-forest-700" />
@@ -96,18 +97,18 @@ export default function Home() {
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Town, area or estate"
+                  placeholder="Area, layout or estate in Enugu"
                   className="h-12 w-full bg-transparent text-[15px] text-forest-950 outline-none placeholder:text-stone-400"
                 />
               </label>
               <select
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                aria-label="State"
-                className="h-12 rounded-full bg-stone-100 px-4 text-sm font-semibold text-forest-900 outline-none sm:w-40"
+                value={lga}
+                onChange={(e) => setLga(e.target.value)}
+                aria-label="Local government area"
+                className="h-12 rounded-full bg-[oklch(0.96_0.01_85)] px-4 text-sm font-semibold text-forest-900 outline-none sm:w-44"
               >
-                <option value="">All states</option>
-                {STATES.map((s) => (
+                <option value="">All of Enugu</option>
+                {HOME_LGAS.map((s) => (
                   <option key={s}>{s}</option>
                 ))}
               </select>
@@ -116,23 +117,43 @@ export default function Home() {
               </Button>
             </form>
 
-            <div className="mt-10 flex flex-wrap gap-x-10 gap-y-4 text-sm">
-              {[
-                ["0%", "commission, either side"],
-                [stats ? String(stats.live) : "—", "plots on the market"],
-                ["2+", "witnesses on every sale"],
-              ].map(([big, small]) => (
-                <div key={small}>
-                  <p className="font-display text-3xl text-white">{big}</p>
-                  <p className="text-white/55">{small}</p>
-                </div>
+            <div className="mt-5 flex max-w-xl flex-wrap items-center gap-2 text-[13px]">
+              <span className="mr-1 text-white/50">Popular:</span>
+              {POPULAR_AREAS.slice(0, 5).map((a) => (
+                <Link
+                  key={a}
+                  href={`/lands?q=${encodeURIComponent(a)}`}
+                  className="rounded-full bg-white/8 px-3 py-1 font-medium text-white/80 ring-1 ring-white/12 transition hover:bg-white/15 hover:text-white"
+                >
+                  {a}
+                </Link>
               ))}
             </div>
+
+            <dl className="mt-12 grid max-w-xl grid-cols-3 divide-x divide-white/12 border-t border-white/12 pt-6">
+              {[
+                ["0%", "commission, either side"],
+                ["100%", "titles searched at the Ministry"],
+                [
+                  stats?.live ? String(stats.live) : "17",
+                  stats?.live ? "plots on the market" : "LGAs of Enugu covered",
+                ],
+              ].map(([big, small], i) => (
+                <div key={small} className={cx(i > 0 && "pl-5", i < 2 && "pr-5")}>
+                  <dt className="sr-only">{small}</dt>
+                  <dd className="font-display text-3xl text-white tabular">{big}</dd>
+                  <dd className="mt-1 text-[13px] leading-snug text-white/55">{small}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <HeroPlan />
         </div>
       </section>
+
+      {/* ---------------------------------------------------------------- Title search */}
+      <TitleSearch />
 
       {/* ---------------------------------------------------------------- Savings */}
       <Savings />
@@ -142,7 +163,10 @@ export default function Home() {
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
           <div>
             <Eyebrow>On the market</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-5xl">Fresh land, from owners</h2>
+            <h2 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-5xl">Fresh land in Enugu</h2>
+            <p className="mt-3 max-w-lg text-ink-soft">
+              Straight from the owners, every title searched before it is listed.
+            </p>
           </div>
           <ButtonLink href="/lands" variant="secondary">
             All land for sale
@@ -238,7 +262,7 @@ export default function Home() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {[
-            [icons.shield, "Reviewed listings", "Our staff check every listing and its papers before it goes live."],
+            [icons.shield, "Title searched", "We search every title at the Enugu State Ministry of Lands first."],
             [icons.bank, "We never hold money", "You pay the seller's own account. Nobody else's, whoever asks."],
             [icons.doc, "Papers before payment", "Buyers with a deal see the title documents and survey plan."],
             [icons.eye, "Everything on record", "Offers, messages, receipts and signatures, kept for both sides."],
@@ -256,7 +280,7 @@ export default function Home() {
 
       {/* ---------------------------------------------------------------- CTA */}
       <section className="mx-auto max-w-7xl px-4 pt-24 sm:px-6">
-        <div className="deep-ground relative overflow-hidden rounded-[2.5rem] px-8 py-16 text-white sm:px-16 sm:py-20">
+        <div className="deep-ground relative overflow-hidden rounded-4xl px-8 py-16 text-white sm:px-16 sm:py-20">
           <div className="absolute inset-y-0 right-0 hidden w-1/2 opacity-60 md:block" aria-hidden="true">
             <PlotArt seed="cta-plan-desmind" landUse="agricultural" />
             <div className="absolute inset-0 bg-gradient-to-r from-[var(--deep)] to-transparent" />
@@ -314,20 +338,27 @@ function Contours() {
 function HeroPlan() {
   return (
     <div className="relative mx-auto w-full max-w-md animate-rise [animation-delay:150ms] lg:max-w-none">
-      <div className="overflow-hidden rounded-[2rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
+      <div className="overflow-hidden rounded-4xl shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/15">
         <div className="aspect-[4/3.4]">
           <PlotArt seed="hero-emene-two-plots" animate label="Survey plan of a parcel of land" />
         </div>
         <div className="flex items-center justify-between bg-[oklch(0.15_0.025_165)] px-6 py-4 text-sm">
           <div>
             <p className="font-display text-lg text-white">2 plots · Emene, Enugu</p>
-            <p className="text-white/50">Certificate of Occupancy</p>
+            <p className="mt-0.5 flex items-center gap-1.5 text-white/55">
+              Certificate of Occupancy
+              <span className="text-white/25">·</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-brass-300">
+                <Icon d={icons.shield} className="size-3.5" />
+                Title searched
+              </span>
+            </p>
           </div>
           <p className="font-display text-2xl text-brass-300">₦13.5m</p>
         </div>
       </div>
 
-      <div className="absolute -bottom-8 -left-4 w-64 animate-float rounded-3xl bg-white p-5 text-forest-950 shadow-lift sm:-left-10">
+      <div className="absolute bottom-28 -left-4 w-60 animate-float rounded-3xl bg-white p-5 text-forest-950 shadow-lift sm:-left-12">
         <p className="text-[10px] font-bold tracking-[0.2em] text-earth-600 uppercase">Contract of sale</p>
         <ul className="mt-3 space-y-2.5 text-[13px]">
           {[
@@ -348,9 +379,95 @@ function HeroPlan() {
         </ul>
       </div>
 
-      <div className="absolute -top-6 -right-2 rounded-2xl bg-earth-500 px-4 py-3 text-white shadow-lift [animation-delay:1.2s] sm:-right-6">
+      <div className="absolute -top-5 left-6 rounded-2xl bg-earth-500 px-4 py-3 text-white shadow-lift sm:left-8">
         <p className="text-[10px] font-bold tracking-[0.18em] uppercase opacity-80">Agent fees</p>
         <p className="font-display text-2xl leading-none">₦0</p>
+      </div>
+    </div>
+  );
+}
+
+/** The title search: what DesMind does at the Ministry of Lands before any land is listed. */
+function TitleSearch() {
+  const steps = [
+    ["Seller lists", "Title document and survey plan uploaded with the listing."],
+    ["We search", "Our staff search the title at the Enugu State Ministry of Lands."],
+    ["We compare", "Owner on record, plot and survey checked against the papers."],
+    ["Then it goes live", "Only land that passes is published, with the date of the search."],
+  ];
+  return (
+    <section id="title-search" className="mx-auto max-w-7xl scroll-mt-24 px-4 pt-24 sm:px-6">
+      <div className="grid items-center gap-14 lg:grid-cols-[1fr_1.05fr]">
+        <div>
+          <Eyebrow>Before anything is listed</Eyebrow>
+          <h2 className="mt-4 font-display text-4xl leading-[1.08] text-ink sm:text-5xl">
+            We search every title at the{" "}
+            <span className="text-forest-700 italic dark:text-primary">Ministry of Lands.</span>
+          </h2>
+          <p className="mt-6 max-w-lg text-lg leading-relaxed text-ink-soft">
+            Fake papers and land sold twice are the biggest risks in buying land. So before any plot goes on DesMind
+            Lands, we take its title to the Enugu State Ministry of Lands and confirm it is genuine and in the
+            seller&apos;s name.
+          </p>
+          <ol className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+            {steps.map(([title, body], i) => (
+              <li key={title} className="flex gap-4">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-line-strong bg-surface font-mono text-xs font-semibold text-earth-600">
+                  {i + 1}
+                </span>
+                <div>
+                  <p className="font-semibold text-ink">{title}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-ink-soft">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <SearchReport />
+      </div>
+    </section>
+  );
+}
+
+/** A title search report, as a buyer sees one on a listing. */
+function SearchReport() {
+  const rows: [string, string][] = [
+    ["Document", "Certificate of Occupancy"],
+    ["Registered owner", "Matches the seller"],
+    ["Location", "Emene, Enugu East LGA"],
+    ["Encumbrances", "None recorded"],
+    ["Government acquisition", "None recorded"],
+  ];
+  return (
+    <div className="relative">
+      <div className="absolute -inset-3 rotate-[1.5deg] rounded-4xl bg-forest-100" aria-hidden="true" />
+      <div className="relative overflow-hidden rounded-4xl border border-line bg-surface shadow-lift">
+        <div className="deep-ground flex items-center justify-between gap-4 px-7 py-5 text-white">
+          <div>
+            <p className="text-[10px] font-bold tracking-[0.22em] text-brass-300 uppercase">Title search report</p>
+            <p className="mt-1 font-display text-xl">Enugu State Ministry of Lands</p>
+          </div>
+          <span className="rounded-full bg-white/10 px-3 py-1 font-mono text-[11px] text-white/80 ring-1 ring-white/15">
+            ENS/MLS/24817
+          </span>
+        </div>
+        <dl className="divide-y divide-line px-7">
+          {rows.map(([k, v]) => (
+            <div key={k} className="flex items-center justify-between gap-6 py-3.5 text-sm">
+              <dt className="text-ink-soft">{k}</dt>
+              <dd className="flex items-center gap-2 text-right font-semibold text-ink">
+                {v}
+                <span className="grid size-5 place-items-center rounded-full bg-forest-100 text-forest-700">
+                  <Icon d={icons.check} className="size-3" />
+                </span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className="flex items-center justify-between gap-4 border-t border-line bg-sunken px-7 py-5">
+          <TitleSearchSeal at="2026-11-04" />
+          <span className="hidden font-mono text-[11px] text-ink-faint sm:block">Example</span>
+        </div>
       </div>
     </div>
   );
@@ -363,7 +480,7 @@ function Savings() {
   const each = kobo * 0.1;
   return (
     <section className="mx-auto -mt-1 max-w-7xl px-4 pt-24 sm:px-6">
-      <div className="grid overflow-hidden rounded-[2.5rem] border border-line bg-surface shadow-soft lg:grid-cols-[1.1fr_1fr]">
+      <div className="grid overflow-hidden rounded-4xl border border-line bg-surface shadow-soft lg:grid-cols-[1.1fr_1fr]">
         <div className="p-8 sm:p-12">
           <Eyebrow>What an agent costs</Eyebrow>
           <h2 className="mt-4 font-display text-4xl leading-tight text-ink sm:text-[2.8rem]">
@@ -381,7 +498,7 @@ function Savings() {
             value={millions}
             onChange={(e) => setMillions(Number(e.target.value))}
             aria-label="Price of the land, in millions of naira"
-            className="mt-10 w-full accent-[oklch(0.6_0.15_40)]"
+            className="mt-10 w-full accent-accent"
           />
           <div className="mt-2 flex justify-between font-mono text-xs text-ink-faint">
             <span>₦1m</span>
@@ -432,8 +549,8 @@ function SignatureSheet() {
   ];
   return (
     <div className="relative">
-      <div className="absolute -inset-4 -rotate-2 rounded-[2.5rem] bg-earth-100" aria-hidden="true" />
-      <div className="relative rounded-[2rem] border border-line bg-surface p-8 shadow-lift sm:p-10">
+      <div className="absolute -inset-4 -rotate-2 rounded-4xl bg-earth-100" aria-hidden="true" />
+      <div className="relative rounded-4xl border border-line bg-surface p-8 shadow-lift sm:p-10">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[10px] font-bold tracking-[0.22em] text-earth-600 uppercase">Signed electronically</p>
@@ -472,7 +589,7 @@ function SignatureSheet() {
 
 function FirstListing() {
   return (
-    <div className="survey-grid grid items-center gap-8 rounded-[2rem] border border-dashed border-line-strong p-10 md:grid-cols-[1fr_auto]">
+    <div className="survey-grid grid items-center gap-8 rounded-4xl border border-dashed border-line-strong p-10 md:grid-cols-[1fr_auto]">
       <div>
         <p className="font-display text-3xl text-ink">Be the first to list land here.</p>
         <p className="mt-2 text-ink-soft">Listing is free, and you keep the whole price.</p>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { TitleBars } from "@/components/listing-card";
 import { PlotArt } from "@/components/plot-art";
 import { useSession } from "@/components/session";
@@ -22,8 +22,9 @@ import {
   icons,
   statusTone,
   Textarea,
+  TitleSearchSeal,
 } from "@/components/ui";
-import { api, type Listing, openFile } from "@/lib/api";
+import { ApiError, api, type Listing, openFile } from "@/lib/api";
 import {
   agentCut,
   FEATURES,
@@ -33,6 +34,7 @@ import {
   LAND_USE,
   LISTING_STATUS,
   nairaToKobo,
+  shortNaira,
   TITLE_LABEL,
   TITLE_STRENGTH,
 } from "@/lib/land";
@@ -51,24 +53,77 @@ type Detail = {
 export default function LandPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [data, setData] = useState<Detail | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string; missing: boolean } | null>(null);
   const [photo, setPhoto] = useState(0);
+  const [panelSeen, setPanelSeen] = useState(true);
+  const loaded = useRef(false);
+  const panel = useRef<HTMLElement>(null);
 
-  const load = () => api<Detail>(`/listings/${id}`).then(setData, (err) => setError(err.message));
+  const load = () =>
+    api<Detail>(`/listings/${id}`).then(
+      (d) => {
+        loaded.current = true;
+        setData(d);
+        setError(null);
+      },
+      (err) => {
+        // A refresh that fails (after saving, say) leaves the page as it was.
+        if (loaded.current) return toast(err.message, "error");
+        setError({ message: err.message, missing: err instanceof ApiError && err.status === 404 });
+      },
+    );
   // biome-ignore lint/correctness/useExhaustiveDependencies: load on id change.
   useEffect(() => {
     load();
   }, [id]);
 
+  // Left and right turn the photos, unless someone is typing an offer.
+  const photoCount = data?.photos.length ?? 0;
+  useEffect(() => {
+    if (photoCount < 2) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      if ((e.target as HTMLElement).closest("input, textarea, select, [contenteditable]")) return;
+      setPhoto((n) => (n + (e.key === "ArrowRight" ? 1 : -1) + photoCount) % photoCount);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [photoCount]);
+
+  // On a phone the offer panel is a long scroll down: a bar at the foot of the screen leads
+  // to it, and steps aside once the panel itself is in view.
+  const ready = data !== null;
+  useEffect(() => {
+    const el = panel.current;
+    if (!ready || !el) return;
+    const seen = new IntersectionObserver(([entry]) => setPanelSeen(entry?.isIntersecting ?? true));
+    seen.observe(el);
+    return () => seen.disconnect();
+  }, [ready]);
+
   if (error)
     return (
       <Page>
         <div className="mx-auto max-w-md py-16 text-center">
-          <p className="font-display text-3xl">Land not found</p>
-          <p className="mt-3 text-ink-soft">{error}</p>
-          <ButtonLink href="/lands" className="mt-8">
-            Browse land for sale
-          </ButtonLink>
+          <p className="font-display text-3xl">{error.missing ? "Land not found" : "This page did not load"}</p>
+          <p className="mt-3 text-ink-soft">
+            {error.missing ? "It may have been withdrawn by its owner, or the link is wrong." : error.message}
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            {!error.missing && (
+              <Button
+                onClick={() => {
+                  setError(null);
+                  load();
+                }}
+              >
+                Try again
+              </Button>
+            )}
+            <ButtonLink href="/lands" variant={error.missing ? "primary" : "secondary"}>
+              Browse land for sale
+            </ButtonLink>
+          </div>
         </div>
       </Page>
     );
@@ -77,19 +132,28 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
   const { listing: l, photos, seller, viewer } = data;
   const cut = agentCut(l.priceKobo);
   const strength = TITLE_STRENGTH[l.titleKind];
+  const canOffer = l.status === "published" && !viewer.mine && !(data.myDeal && data.myDeal.stage !== "cancelled");
   const mapQuery = l.latitude != null ? `${l.latitude},${l.longitude}` : `${l.town}, ${l.lga}, ${l.state}, Nigeria`;
 
   return (
     <Page wide>
-      <div className="flex flex-wrap items-center gap-3 text-sm text-ink-faint">
-        <Link href="/lands" className="hover:text-ink">
+      <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-[13px] text-ink-faint">
+        <Link href="/lands" className="font-medium hover:text-ink">
           Land for sale
         </Link>
-        <span>/</span>
-        <span>{l.state}</span>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
+        <span>{l.state} State</span>
+        {l.lga && (
+          <>
+            <span aria-hidden="true">/</span>
+            <Link href={`/lands?lga=${encodeURIComponent(l.lga)}`} className="font-medium hover:text-ink">
+              {l.lga}
+            </Link>
+          </>
+        )}
+        <span aria-hidden="true">/</span>
         <span className="text-ink-soft">{l.town}</span>
-      </div>
+      </nav>
 
       {(viewer.mine || viewer.admin) && l.status !== "published" && (
         <div className="mt-6 flex flex-wrap items-center gap-4 rounded-3xl border border-amber-100 bg-amber-50 px-6 py-4 text-sm text-amber-800">
@@ -109,10 +173,14 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
 
       {/* Gallery */}
       <div className="mt-6 grid animate-rise gap-3 lg:grid-cols-[2fr_1fr]">
-        <div className="relative aspect-[16/10] overflow-hidden rounded-[2rem] bg-forest-950">
+        <div className="relative aspect-[16/10] overflow-hidden rounded-4xl bg-forest-950">
           {photos.length ? (
             // biome-ignore lint/performance/noImgElement: signed storage URL.
-            <img src={photos[photo]?.url} alt={l.title} className="size-full object-cover" />
+            <img
+              src={photos[photo]?.url}
+              alt={`${l.title} (${photo + 1} of ${photos.length})`}
+              className="size-full object-cover"
+            />
           ) : (
             <PlotArt seed={l.id} landUse={l.landUse} animate />
           )}
@@ -124,9 +192,9 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
                   type="button"
                   aria-label={i ? "Next photo" : "Previous photo"}
                   onClick={() => setPhoto((photo + (i ? 1 : -1) + photos.length) % photos.length)}
-                  className="grid size-11 place-items-center rounded-full bg-white/90 text-xl text-forest-950 shadow-lift backdrop-blur hover:bg-white"
+                  className="grid size-11 place-items-center rounded-full bg-white/92 text-forest-950 shadow-lift backdrop-blur transition hover:bg-white"
                 >
-                  {arrow}
+                  <Icon d={icons.arrow} className={cx("size-4", !i && "rotate-180")} />
                 </button>
               ))}
             </div>
@@ -139,7 +207,7 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
         </div>
         <div className={cx("grid gap-3", photos.length ? "grid-cols-2 lg:grid-cols-1" : "min-h-64")}>
           {photos.length > 0 && (
-            <div className="relative overflow-hidden rounded-[2rem] bg-forest-950">
+            <div className="relative overflow-hidden rounded-4xl bg-forest-950">
               <PlotArt seed={l.id} landUse={l.landUse} label="Survey plan illustration" />
               <span className="absolute bottom-3 left-3 rounded-full bg-black/40 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur">
                 Illustration
@@ -147,23 +215,33 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
             </div>
           )}
           {photos.length > 1 ? (
-            <div className="grid grid-cols-3 gap-2 overflow-hidden rounded-[2rem]">
+            <div className="grid grid-cols-3 gap-2 overflow-hidden rounded-4xl">
               {photos.slice(0, 6).map((p, i) => (
                 <button
                   key={p.id}
                   type="button"
                   onClick={() => setPhoto(i)}
-                  className={cx("aspect-square overflow-hidden", i === photo && "ring-4 ring-earth-500 ring-inset")}
+                  aria-label={`Photo ${i + 1} of ${photos.length}`}
+                  aria-current={i === photo}
+                  className={cx(
+                    "relative aspect-square overflow-hidden",
+                    i === photo && "ring-4 ring-earth-500 ring-inset",
+                  )}
                 >
                   {/* biome-ignore lint/performance/noImgElement: signed storage URL. */}
-                  <img src={p.url} alt="" className="size-full object-cover" />
+                  <img src={p.url} alt="" loading="lazy" className="size-full object-cover" />
+                  {i === 5 && photos.length > 6 && (
+                    <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-bold text-white">
+                      +{photos.length - 6}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
           ) : (
             <iframe
               title="Map"
-              className="size-full min-h-64 rounded-[2rem] border border-line grayscale-[0.4]"
+              className="size-full min-h-64 rounded-4xl border border-line grayscale-[0.4]"
               loading="lazy"
               src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=${l.latitude != null ? 15 : 12}&output=embed`}
             />
@@ -173,7 +251,7 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_400px]">
         <div className="min-w-0">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge tone={statusTone[l.status]} live={l.status === "published"}>
               {LISTING_STATUS[l.status]}
             </Badge>
@@ -182,6 +260,9 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
               <Badge tone="earth">
                 {data.interest} buyer{data.interest > 1 ? "s" : ""} in talks
               </Badge>
+            )}
+            {["published", "under_offer", "sold"].includes(l.status) && (
+              <ShareButton title={l.title} where={l.town} price={shortNaira(l.priceKobo)} />
             )}
           </div>
           <h1 className="mt-5 font-display text-4xl leading-[1.08] text-ink sm:text-5xl">{l.title}</h1>
@@ -228,6 +309,43 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
               </ul>
             </section>
           )}
+
+          <section className="mt-12">
+            <h2 className="font-display text-2xl text-ink">Title search</h2>
+            {l.titleSearchedAt ? (
+              <div className="mt-5 overflow-hidden rounded-3xl border border-forest-200 bg-forest-50/60 dark:border-forest-300">
+                <div className="flex flex-wrap items-center justify-between gap-4 p-6">
+                  <TitleSearchSeal at={l.titleSearchedAt} />
+                  {l.titleSearchRef && (
+                    <span className="rounded-full bg-surface px-3 py-1 font-mono text-xs text-ink-soft ring-1 ring-line">
+                      Ref. {l.titleSearchRef}
+                    </span>
+                  )}
+                </div>
+                <div className="border-t border-forest-200 bg-surface px-6 py-5 text-sm leading-relaxed text-ink-soft dark:border-forest-300">
+                  {l.titleSearchNote ? (
+                    <p>
+                      <span className="font-semibold text-ink">What the search showed: </span>
+                      {l.titleSearchNote}
+                    </p>
+                  ) : (
+                    <p>
+                      Before listing, DesMind Lands searched this title at the {l.state} State Ministry of Lands and
+                      found it on record. The search reference and findings open to you once you make an offer.
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs text-ink-faint">
+                    A search shows what the Ministry&apos;s records said on the day. Still visit the land, and take your
+                    own legal advice before you pay.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-3xl border border-dashed border-line-strong bg-surface p-6 text-sm text-ink-soft">
+                The title search for this land is still being done at the Ministry of Lands.
+              </div>
+            )}
+          </section>
 
           <section className="mt-12">
             <h2 className="font-display text-2xl text-ink">Title and papers</h2>
@@ -299,17 +417,22 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
         </div>
 
         {/* The buying panel */}
-        <aside className="lg:sticky lg:top-28 lg:self-start">
-          <div className="overflow-hidden rounded-[2rem] border border-line bg-surface shadow-lift">
+        <aside ref={panel} id="offer" className="scroll-mt-24 lg:sticky lg:top-28 lg:self-start">
+          <div className="overflow-hidden rounded-4xl border border-line bg-surface shadow-lift">
             <div className="deep-ground p-7 text-white">
               <p className="text-xs font-semibold tracking-[0.18em] text-brass-300 uppercase">
                 {l.negotiable ? "Asking price · negotiable" : "Fixed price"}
               </p>
-              <p className="mt-2 font-display text-5xl">{formatKobo(l.priceKobo)}</p>
+              <p className="mt-2 font-display text-[2.75rem] leading-none tabular">{formatKobo(l.priceKobo)}</p>
               <p className="mt-4 text-sm text-white/65">
                 An agent on each side would take up to <strong className="text-white">{formatKobo(cut.high)}</strong>{" "}
                 from this sale. Here: nothing.
               </p>
+              {l.titleSearchedAt && (
+                <div className="mt-6 border-t border-white/12 pt-5">
+                  <TitleSearchSeal at={l.titleSearchedAt} light />
+                </div>
+              )}
             </div>
             <div className="p-7">
               <BuyPanel data={data} onSaved={load} />
@@ -336,7 +459,64 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
           )}
         </aside>
       </div>
+
+      {canOffer && (
+        <div
+          // `inert` rather than only hidden: off screen, its button must not take focus.
+          inert={panelSeen}
+          className={cx(
+            "fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_-12px_oklch(0.2_0.03_160/0.25)] backdrop-blur-xl transition duration-300 lg:hidden print:hidden",
+            panelSeen && "translate-y-full opacity-0",
+          )}
+        >
+          <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="font-display text-2xl leading-none text-ink tabular">{formatKobo(l.priceKobo)}</p>
+              <p className="mt-1 truncate text-xs text-ink-faint">
+                {l.negotiable ? "Negotiable" : "Fixed price"} · no agent's commission
+              </p>
+            </div>
+            <Button
+              variant="earth"
+              onClick={() => panel.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              className="shrink-0"
+            >
+              Make an offer
+            </Button>
+          </div>
+        </div>
+      )}
     </Page>
+  );
+}
+
+/** Land is passed on by WhatsApp: the phone's own share sheet where there is one, else copy the link. */
+function ShareButton({ title, where, price }: { title: string; where: string; price: string }) {
+  const share = async () => {
+    const url = `${window.location.origin}${window.location.pathname}`;
+    if (navigator.share) {
+      // Closing the sheet rejects: that is a choice, not an error.
+      await navigator
+        .share({ title, text: `${title}, ${where}: ${price}. Direct from the owner, no agent.`, url })
+        .catch(() => {});
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Link copied");
+    } catch {
+      toast("Could not copy. Copy the address from your browser instead.", "error");
+    }
+  };
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="ml-auto inline-flex h-10 items-center gap-2 rounded-full border border-line-strong bg-surface px-4 text-[13px] font-semibold text-ink shadow-soft transition hover:border-forest-600"
+    >
+      <Icon d={icons.link} className="size-4" />
+      Share
+    </button>
   );
 }
 
@@ -347,7 +527,14 @@ function BuyPanel({ data, onSaved }: { data: Detail; onSaved: () => void }) {
   const [amount, setAmount] = useState(l.negotiable ? "" : String(l.priceKobo / 100));
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Back from signing up: the offer they had typed is still there (see `offer` below).
+  useEffect(() => {
+    const typed = new URLSearchParams(window.location.search).get("offer");
+    if (typed && l.negotiable && nairaToKobo(typed)) setAmount(typed);
+  }, [l.negotiable]);
 
   if (data.viewer.mine)
     return (
@@ -379,15 +566,25 @@ function BuyPanel({ data, onSaved }: { data: Detail; onSaved: () => void }) {
 
   const save = async () => {
     if (!me) return router.push(`/login?next=/lands/${l.id}`);
-    await api(`/listings/${l.id}/save`, data.viewer.saved ? "DELETE" : "POST");
-    toast(data.viewer.saved ? "Removed from saved land" : "Saved");
-    onSaved();
+    setSaving(true);
+    try {
+      await api(`/listings/${l.id}/save`, data.viewer.saved ? "DELETE" : "POST");
+      toast(data.viewer.saved ? "Removed from saved land" : "Saved. Find it on your dashboard.");
+      onSaved();
+    } catch (err) {
+      toast((err as Error).message, "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   async function offer(e: React.FormEvent) {
     e.preventDefault();
-    if (!me) return router.push(`/signup?next=/lands/${l.id}`);
     const kobo = nairaToKobo(amount);
+    if (!me) {
+      const back = `/lands/${l.id}${kobo && l.negotiable ? `?offer=${encodeURIComponent(amount.trim())}` : ""}`;
+      return router.push(`/signup?next=${encodeURIComponent(back)}`);
+    }
     if (!kobo) return setError("Enter your offer in naira, e.g. 12,500,000 or 12.5m.");
     setBusy(true);
     setError(null);
@@ -402,17 +599,28 @@ function BuyPanel({ data, onSaved }: { data: Detail; onSaved: () => void }) {
   }
 
   const kobo = nairaToKobo(amount);
+  // How the offer sits against the asking price, in the buyer's own terms.
+  const gap = kobo && l.negotiable ? Math.round(((kobo - l.priceKobo) / l.priceKobo) * 100) : 0;
+  const against = gap === 0 ? "the asking price" : `${Math.abs(gap)}% ${gap < 0 ? "below" : "above"} asking`;
   return (
     <form onSubmit={offer} className="space-y-4">
       <Eyebrow>Make an offer</Eyebrow>
       <Field
         label="Your offer (₦)"
         hint={
-          kobo ? <span className="font-semibold text-ink-soft">{formatKobo(kobo)}</span> : "e.g. 12,500,000 or 12.5m"
+          kobo ? (
+            <span className="font-semibold text-ink-soft">
+              {formatKobo(kobo)}
+              {l.negotiable && kobo !== l.priceKobo && <span className="font-normal text-ink-faint"> · {against}</span>}
+            </span>
+          ) : (
+            "e.g. 12,500,000 or 12.5m"
+          )
         }
       >
         <Input
           inputMode="decimal"
+          autoComplete="off"
           value={amount}
           disabled={!l.negotiable}
           onChange={(e) => setAmount(e.target.value)}
@@ -431,7 +639,14 @@ function BuyPanel({ data, onSaved }: { data: Detail; onSaved: () => void }) {
       <Button type="submit" variant="earth" size="lg" busy={busy} className="w-full">
         {me ? "Send offer" : "Sign up to make an offer"}
       </Button>
-      <Button type="button" variant="ghost" onClick={save} className="w-full">
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={save}
+        busy={saving}
+        aria-pressed={data.viewer.saved}
+        className="w-full"
+      >
         <Icon d={icons.heart} className={cx("size-4", data.viewer.saved && "fill-earth-500 text-earth-500")} />
         {data.viewer.saved ? "Saved" : "Save for later"}
       </Button>

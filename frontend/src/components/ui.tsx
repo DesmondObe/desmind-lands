@@ -17,7 +17,8 @@ const buttonBase =
   "relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50";
 
 const buttonVariant: Record<Variant, string> = {
-  primary: "bg-primary text-on-primary shadow-soft hover:bg-primary-hover hover:shadow-lift",
+  primary:
+    "bg-primary text-on-primary shadow-soft ring-1 ring-inset ring-white/10 hover:bg-primary-hover hover:shadow-card",
   earth:
     "bg-earth-500 text-white shadow-soft hover:bg-earth-600 hover:shadow-lift dark:bg-earth-400 dark:text-forest-950",
   secondary:
@@ -29,8 +30,8 @@ const buttonVariant: Record<Variant, string> = {
 
 const buttonSize: Record<Size, string> = {
   sm: "h-9 px-4 text-[13px]",
-  md: "h-11 px-6 text-sm",
-  lg: "h-14 px-8 text-[15px]",
+  md: "h-11 px-5 text-[14px]",
+  lg: "h-13 px-7 text-[15px]",
 };
 
 export const buttonClass = (variant: Variant = "primary", size: Size = "md", className?: string) =>
@@ -74,7 +75,7 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 const fieldClass =
-  "w-full rounded-xl border border-line-strong bg-surface px-4 py-3 text-[15px] text-ink outline-none transition placeholder:text-ink-faint hover:border-ink-faint focus:border-forest-600 focus:ring-4 focus:ring-forest-100 disabled:opacity-60";
+  "w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-[15px] text-ink shadow-[0_1px_1px_oklch(0.2_0.03_160/0.04)] outline-none transition placeholder:text-ink-faint hover:border-ink-faint/60 focus:border-forest-600 focus:ring-4 focus:ring-forest-600/12 disabled:bg-sunken disabled:text-ink-soft";
 
 export const Input = (props: InputHTMLAttributes<HTMLInputElement>) => (
   <input {...props} className={cx(fieldClass, props.className)} />
@@ -90,7 +91,7 @@ export function Field({ label, hint, children }: { label: string; hint?: ReactNo
   return (
     // biome-ignore lint/a11y/noLabelWithoutControl: the control arrives as children, inside the label.
     <label className="block space-y-1.5">
-      <span className="text-[13px] font-semibold text-ink-soft">{label}</span>
+      <span className="text-[13px] font-semibold text-ink">{label}</span>
       {children}
       {hint && <span className="block text-xs leading-relaxed text-ink-faint">{hint}</span>}
     </label>
@@ -98,7 +99,7 @@ export function Field({ label, hint, children }: { label: string; hint?: ReactNo
 }
 
 export function Card({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx("rounded-3xl border border-line bg-surface p-6 shadow-soft", className)}>{children}</div>;
+  return <div className={cx("rounded-3xl border border-line bg-surface p-6 shadow-card", className)}>{children}</div>;
 }
 
 type Tone = "good" | "wait" | "bad" | "quiet" | "info" | "earth";
@@ -191,10 +192,8 @@ export function PageTitle({
     <div className="mb-10 flex animate-rise flex-wrap items-end justify-between gap-5">
       <div>
         {eyebrow && <Eyebrow className="mb-4">{eyebrow}</Eyebrow>}
-        <h1 className="font-display text-4xl leading-[1.05] font-normal tracking-tight text-ink sm:text-5xl">
-          {title}
-        </h1>
-        {subtitle && <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-ink-soft">{subtitle}</p>}
+        <h1 className="font-display text-[2.6rem] leading-[1.04] font-normal text-ink sm:text-[3.4rem]">{title}</h1>
+        {subtitle && <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-soft">{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -203,7 +202,7 @@ export function PageTitle({
 
 export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="survey-grid flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line-strong px-6 py-14 text-center">
+    <div className="survey-grid flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line-strong bg-surface/60 px-6 py-16 text-center">
       <svg viewBox="0 0 48 48" fill="none" className="size-12 text-earth-500" aria-hidden="true">
         <path d="M8 34 14 12l22 4 4 20-32-2Z" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 3" />
         {[
@@ -273,6 +272,73 @@ export function Logo({ className, inverted }: { className?: string; inverted?: b
         </span>
       </span>
     </span>
+  );
+}
+
+/**
+ * The seal on land whose title DesMind searched at the State Ministry of Lands: a shield and
+ * tick, and the words. `compact` is for cards and photos; `light` for dark grounds.
+ */
+export function TitleSearchSeal({
+  at,
+  compact,
+  light,
+  className,
+}: {
+  at?: string | null;
+  compact?: boolean;
+  light?: boolean;
+  className?: string;
+}) {
+  const day = at ? new Date(at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null;
+  if (compact)
+    return (
+      <span
+        className={cx(
+          "inline-flex items-center gap-1.5 rounded-full py-1 pr-2.5 pl-1.5 text-[11px] font-bold whitespace-nowrap",
+          light ? "bg-white/92 text-forest-900 shadow-soft backdrop-blur" : "bg-forest-100 text-forest-800",
+          className,
+        )}
+      >
+        <ShieldTick className="size-4" />
+        Title searched
+      </span>
+    );
+  return (
+    <span className={cx("inline-flex items-center gap-2.5", className)}>
+      <span
+        className={cx(
+          "grid size-9 shrink-0 place-items-center rounded-xl",
+          light ? "bg-white/10 text-brass-300 ring-1 ring-white/15" : "bg-forest-100 text-forest-700",
+        )}
+      >
+        <ShieldTick className="size-5" />
+      </span>
+      <span className="leading-tight">
+        <span className={cx("block text-[13px] font-bold", light ? "text-white" : "text-ink")}>
+          Title searched at the Ministry of Lands
+        </span>
+        <span className={cx("block text-xs", light ? "text-white/60" : "text-ink-faint")}>
+          {day ? `By DesMind Lands, ${day}` : "By DesMind Lands, before listing"}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+function ShieldTick({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} aria-hidden="true">
+      <path d="M10 1.8 3.2 4.4v5.2c0 4.1 2.9 7.1 6.8 8.6 3.9-1.5 6.8-4.5 6.8-8.6V4.4L10 1.8Z" fill="currentColor" />
+      <path
+        d="m6.8 10.1 2.2 2.2 4.3-4.6"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

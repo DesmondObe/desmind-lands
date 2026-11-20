@@ -4,6 +4,14 @@ const naira = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN
 export const formatKobo = (kobo: number | null | undefined) => (kobo == null ? "—" : naira.format(kobo / 100));
 
 /** "2026-09-01" → "1 September 2026", in UTC so nothing shifts it. */
+/**
+ * Today's date (YYYY-MM-DD) where the land is. Nigeria is an hour ahead of UTC, so a payment
+ * made just after midnight in Enugu is dated "tomorrow" by the UTC calendar.
+ */
+export function today() {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date());
+}
+
 export function formatDay(day: string | Date | null | undefined) {
   if (!day) return "—";
   const d = typeof day === "string" ? new Date(day.length === 10 ? `${day}T00:00:00Z` : day) : day;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRequireSignIn } from "@/components/session";
 import { Loading, Page } from "@/components/shell";
 import { toast } from "@/components/toast";
@@ -16,8 +16,13 @@ export default function AccountPage() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
+  // Once only. The session refreshes when the tab regains focus; filling the form again then
+  // would wipe what someone had typed before going to copy a phone number.
+  const seeded = useRef(false);
   useEffect(() => {
-    if (me) setProfile({ fullName: me.user.fullName, phone: me.user.phone ? `+${me.user.phone}` : "" });
+    if (!me || seeded.current) return;
+    seeded.current = true;
+    setProfile({ fullName: me.user.fullName, phone: me.user.phone ? `+${me.user.phone}` : "" });
   }, [me]);
   if (!me) return <Loading />;
 
@@ -52,10 +57,20 @@ export default function AccountPage() {
               label="Full name"
               hint="The name you sign agreements with. It cannot change after you have signed one."
             >
-              <Input value={profile.fullName} onChange={(e) => setProfile({ ...profile, fullName: e.target.value })} />
+              <Input
+                required
+                autoComplete="name"
+                value={profile.fullName}
+                onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
+              />
             </Field>
             <Field label="Phone">
-              <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} />
+              <Input
+                type="tel"
+                autoComplete="tel"
+                value={profile.phone}
+                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+              />
             </Field>
             <ErrorText error={error} />
             <Button type="submit" busy={busy === "profile"}>
@@ -86,6 +101,7 @@ export default function AccountPage() {
               <Input
                 type="password"
                 autoComplete="current-password"
+                required
                 value={pw.currentPassword}
                 onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })}
               />
@@ -94,6 +110,8 @@ export default function AccountPage() {
               <Input
                 type="password"
                 autoComplete="new-password"
+                required
+                minLength={10}
                 value={pw.newPassword}
                 onChange={(e) => setPw({ ...pw, newPassword: e.target.value })}
               />

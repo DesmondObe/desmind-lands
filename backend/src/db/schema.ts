@@ -116,6 +116,11 @@ export const listings = pgTable("listings", {
   status: listingStatus("status").notNull().default("draft"),
   reviewNote: text("review_note").notNull().default(""),
   reviewedBy: uuid("reviewed_by"),
+  // The search of the title at the State Ministry of Lands, recorded by staff (0002_title_search.sql).
+  titleSearchedAt: ts("title_searched_at"),
+  titleSearchRef: text("title_search_ref").notNull().default(""),
+  titleSearchNote: text("title_search_note").notNull().default(""),
+  titleSearchedBy: uuid("title_searched_by"),
   publishedAt: ts("published_at"),
   soldAt: ts("sold_at"),
   createdAt: ts("created_at").notNull().defaultNow(),

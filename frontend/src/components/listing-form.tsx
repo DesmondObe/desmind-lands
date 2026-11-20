@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import type { Listing } from "@/lib/api";
-import { FEATURES, formatKobo, LAND_USE, nairaToKobo, STATES, TITLE_LABEL, TITLE_STRENGTH } from "@/lib/land";
+import {
+  FEATURES,
+  formatKobo,
+  HOME_LGAS,
+  HOME_STATE,
+  LAND_USE,
+  nairaToKobo,
+  SERVED,
+  SERVED_STATES,
+  TITLE_LABEL,
+  TITLE_STRENGTH,
+} from "@/lib/land";
 import { TitleBars } from "./listing-card";
 import { Button, cx, ErrorText, Field, Input, Select, Textarea } from "./ui";
 
@@ -54,7 +65,7 @@ export function ListingForm({
   const [f, setF] = useState({
     title: initial?.title ?? "",
     description: initial?.description ?? "",
-    state: initial?.state ?? "",
+    state: initial?.state ?? HOME_STATE,
     lga: initial?.lga ?? "",
     town: initial?.town ?? "",
     addressLine: initial?.addressLine ?? "",
@@ -90,6 +101,14 @@ export function ListingForm({
     setError(null);
     if (!kobo) return setError("Enter the price in naira, e.g. 15,000,000 or 15m.");
     if (!f.titleKind) return setError("Choose the document of title you hold.");
+    // Number("2 plots") is NaN, which goes over the wire as null: say so here instead.
+    const size = Number(f.sizeValue);
+    if (!Number.isFinite(size) || size <= 0) return setError("Enter the size as a number, e.g. 2 or 650.");
+    const lat = f.latitude ? Number(f.latitude) : null;
+    const lng = f.longitude ? Number(f.longitude) : null;
+    if ((lat !== null && !(Math.abs(lat) <= 90)) || (lng !== null && !(Math.abs(lng) <= 180)))
+      return setError("The map position is not a valid latitude and longitude. Use the button, or leave both empty.");
+    if ((lat === null) !== (lng === null)) return setError("Give both the latitude and the longitude, or neither.");
     setBusy(true);
     try {
       await onSubmit({
@@ -131,16 +150,30 @@ export function ListingForm({
           </p>
         )}
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="State">
-            <Select required disabled={locked} value={f.state} onChange={set("state")}>
-              <option value="">Choose…</option>
-              {STATES.map((s) => (
-                <option key={s}>{s}</option>
+          <Field
+            label="State"
+            hint={SERVED_STATES.length === 1 ? "For now, DesMind Lands lists land in Enugu State only." : undefined}
+          >
+            <Select
+              required
+              disabled={locked || SERVED_STATES.length === 1}
+              value={f.state}
+              onChange={(e) => setF({ ...f, state: e.target.value, lga: "" })}
+            >
+              {SERVED_STATES.map((s) => (
+                <option key={s} value={s}>
+                  {s} State
+                </option>
               ))}
             </Select>
           </Field>
           <Field label="Local government area">
-            <Input disabled={locked} value={f.lga} onChange={set("lga")} placeholder="e.g. Enugu East" />
+            <Select required disabled={locked} value={f.lga} onChange={set("lga")}>
+              <option value="">Choose…</option>
+              {(SERVED[f.state] ?? HOME_LGAS).map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </Select>
           </Field>
         </div>
         <Field label="Town or area">
@@ -241,11 +274,14 @@ export function ListingForm({
         title="Title"
         hint="The document that proves you own the land. You upload it after saving; our staff review it."
       >
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div role="radiogroup" aria-label="Document of title" className="grid gap-3 sm:grid-cols-2">
           {Object.entries(TITLE_LABEL).map(([k, v]) => (
+            // biome-ignore lint/a11y/useSemanticElements: a card with a title, bars and a note, chosen like a radio.
             <button
               key={k}
               type="button"
+              role="radio"
+              aria-checked={f.titleKind === k}
               disabled={locked}
               onClick={() => setF({ ...f, titleKind: k })}
               className={cx(
@@ -291,7 +327,7 @@ export function ListingForm({
             type="checkbox"
             checked={f.negotiable}
             onChange={(e) => setF({ ...f, negotiable: e.target.checked })}
-            className="size-5 accent-[oklch(0.6_0.15_40)]"
+            className="size-5 accent-accent"
           />
           <span>
             <span className="block font-semibold text-ink">Open to offers</span>

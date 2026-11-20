@@ -125,6 +125,8 @@ export type ListingCard = {
   status: string;
   publishedAt: string | null;
   createdAt: string;
+  /** When DesMind searched the title at the State Ministry of Lands. */
+  titleSearchedAt: string | null;
   coverUrl: string | null;
   photoCount: number;
   reviewNote?: string;
@@ -136,6 +138,9 @@ export type Listing = Omit<ListingCard, "coverUrl" | "photoCount"> & {
   description: string;
   addressLine: string;
   titleReference: string;
+  /** The Ministry of Lands search reference and finding: for the seller, staff and buyers in a deal. */
+  titleSearchRef: string;
+  titleSearchNote: string;
   latitude: number | null;
   longitude: number | null;
   reviewNote: string;

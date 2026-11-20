@@ -64,6 +64,7 @@ function Footer() {
       [
         ["/lands", "Land for sale"],
         ["/how-it-works#buyers", "How buying works"],
+        ["/how-it-works#title-search", "Our title search"],
         ["/how-it-works#checks", "Checks before you pay"],
       ],
     ],
@@ -94,6 +95,10 @@ function Footer() {
             <p className="max-w-sm font-display text-2xl leading-snug text-white">
               Land, sold directly. <span className="text-brass-300">No agents. No 10% cut.</span>
             </p>
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/6 px-3 py-1.5 text-xs font-semibold text-white/75 ring-1 ring-white/10">
+              <span className="size-1.5 rounded-full bg-earth-400" aria-hidden="true" />
+              Now serving all 17 LGAs of Enugu State. More of Nigeria soon.
+            </p>
             <div className="space-y-1.5 text-sm">
               <a href={`mailto:${contact.email}`} className="block text-white/80 hover:text-white">
                 {contact.email}
@@ -119,8 +124,9 @@ function Footer() {
         </div>
         <div className="mt-16 border-t border-white/10 pt-8 text-xs leading-relaxed text-white/45">
           © {new Date().getFullYear()} {contact.company}. DesMind Lands is a technology platform on which owners and
-          buyers deal directly. It is not an estate agent, holds no money, and does not guarantee title: always inspect
-          the land, search the title and take independent legal advice before you pay.
+          buyers deal directly. It is not an estate agent and holds no money. We search every title at the Enugu State
+          Ministry of Lands before the land is listed; a search reports what the Ministry's records show on the day, and
+          is not a guarantee of title. Always inspect the land and take independent legal advice before you pay.
         </div>
       </div>
     </footer>

@@ -1,12 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlotArt } from "@/components/plot-art";
 import { useRequireSignIn } from "@/components/session";
 import { Loading, Page } from "@/components/shell";
 import { toast } from "@/components/toast";
-import { Badge, Button, cx, Empty, ErrorText, PageTitle, statusTone } from "@/components/ui";
+import {
+  Badge,
+  Button,
+  cx,
+  Empty,
+  ErrorText,
+  Field,
+  Input,
+  PageTitle,
+  statusTone,
+  TitleSearchSeal,
+} from "@/components/ui";
 import { api } from "@/lib/api";
 import { formatKobo, formatSize, LISTING_STATUS, STAGE_LABEL, TITLE_LABEL, timeAgo } from "@/lib/land";
 
@@ -26,6 +37,10 @@ type Row = {
   sellerEmail: string;
   sellerPhone: string;
   papers: number;
+  titleReference: string;
+  titleSearchedAt: string | null;
+  titleSearchRef: string;
+  titleSearchNote: string;
   coverUrl: string | null;
   photoCount: number;
 };
@@ -50,24 +65,46 @@ export default function AdminPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [deals, setDeals] = useState<DealRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [acting, setActing] = useState<string | null>(null);
+  const latest = useRef(0);
 
   const load = useCallback(async () => {
+    // Each load takes a number; only the newest may write. Without it, a slow answer for the
+    // tab just left lands after, and over, the answer for the tab now open.
+    const mine = ++latest.current;
     try {
-      setOverview(await api("/admin/overview"));
-      if (tab === "deals") setDeals((await api<{ deals: DealRow[] }>("/admin/deals")).deals);
-      else setRows((await api<{ listings: Row[] }>(`/admin/listings?status=${tab}`)).listings);
+      const [o, list] = await Promise.all([
+        api<Record<string, number>>("/admin/overview"),
+        tab === "deals"
+          ? api<{ deals: DealRow[] }>("/admin/deals")
+          : api<{ listings: Row[] }>(`/admin/listings?status=${tab}`),
+      ]);
+      if (mine !== latest.current) return;
+      setOverview(o);
+      if ("deals" in list) setDeals(list.deals);
+      else setRows(list.listings);
+      setError(null);
     } catch (err) {
-      setError((err as Error).message);
+      if (mine === latest.current) setError((err as Error).message);
     }
   }, [tab]);
   useEffect(() => {
-    if (me) void load();
+    if (!me) return;
+    // The last tab's rows are not this tab's: show nothing until its own arrive.
+    setRows(null);
+    setDeals(null);
+    void load();
   }, [me, load]);
 
-  if (error)
+  if (error && !overview)
     return (
       <Page>
-        <ErrorText error={error} />
+        <div className="flex flex-wrap items-center gap-3">
+          <ErrorText error={error} />
+          <Button variant="secondary" size="sm" onClick={() => void load()}>
+            Try again
+          </Button>
+        </div>
       </Page>
     );
   if (!overview) return <Loading />;
@@ -75,12 +112,15 @@ export default function AdminPage() {
   const review = async (id: string, status: "published" | "rejected") => {
     const note = status === "rejected" ? window.prompt("What should the seller change?") : "";
     if (status === "rejected" && !note) return;
+    setActing(`${status}${id}`);
     try {
       await api(`/listings/${id}/status`, "POST", { status, note });
       toast(status === "published" ? "Published" : "Sent back to the seller");
       await load();
     } catch (err) {
       toast((err as Error).message, "error");
+    } finally {
+      setActing(null);
     }
   };
 
@@ -96,18 +136,28 @@ export default function AdminPage() {
           ["Value sold", formatKobo(overview.completedValueKobo ?? 0)],
           ["Disputed payments", overview.disputedPayments],
         ].map(([k, v]) => (
-          <div key={k} className="rounded-3xl border border-line bg-surface p-5">
+          <div key={k} className="rounded-2xl border border-line bg-surface p-5 shadow-card">
             <p className="text-xs font-semibold text-ink-faint">{k}</p>
-            <p className="mt-2 font-display text-3xl text-ink">{v}</p>
+            <p className="mt-2 font-display text-3xl text-ink tabular">{v}</p>
           </div>
         ))}
       </div>
+
+      {error && (
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <ErrorText error={error} />
+          <Button variant="secondary" size="sm" onClick={() => void load()}>
+            Try again
+          </Button>
+        </div>
+      )}
 
       <div className="no-scrollbar mt-10 flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map((t) => (
           <button
             key={t}
             type="button"
+            aria-current={tab === t ? "page" : undefined}
             onClick={() => setTab(t)}
             className={cx(
               "-mb-px border-b-2 px-4 py-3 text-sm font-semibold whitespace-nowrap",
@@ -192,11 +242,36 @@ export default function AdminPage() {
                     {r.sellerName} · {r.sellerEmail}
                     {r.sellerPhone && ` · +${r.sellerPhone}`} · {timeAgo(r.updatedAt)}
                   </p>
+                  {r.titleSearchedAt ? (
+                    <div className="mt-4 rounded-2xl bg-forest-50 p-4 text-sm">
+                      <TitleSearchSeal at={r.titleSearchedAt} />
+                      <p className="mt-3 text-ink-soft">
+                        <span className="font-mono text-xs">Ref. {r.titleSearchRef}</span>
+                        {r.titleSearchNote && <> · {r.titleSearchNote}</>}
+                      </p>
+                    </div>
+                  ) : (
+                    r.status === "in_review" && (
+                      <TitleSearchForm id={r.id} titleReference={r.titleReference} onDone={load} />
+                    )
+                  )}
                 </div>
                 {r.status === "in_review" && (
                   <div className="flex gap-2 md:flex-col">
-                    <Button onClick={() => review(r.id, "published")}>Publish</Button>
-                    <Button variant="secondary" onClick={() => review(r.id, "rejected")}>
+                    <Button
+                      onClick={() => review(r.id, "published")}
+                      busy={acting === `published${r.id}`}
+                      disabled={!r.titleSearchedAt || acting !== null}
+                      title={r.titleSearchedAt ? undefined : "Record the Ministry of Lands title search first"}
+                    >
+                      Publish
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      busy={acting === `rejected${r.id}`}
+                      disabled={acting !== null}
+                      onClick={() => review(r.id, "rejected")}
+                    >
                       Needs changes
                     </Button>
                   </div>
@@ -209,5 +284,53 @@ export default function AdminPage() {
         )}
       </div>
     </Page>
+  );
+}
+
+/** Staff: record the search of a listing's title at the State Ministry of Lands. */
+function TitleSearchForm({ id, titleReference, onDone }: { id: string; titleReference: string; onDone: () => void }) {
+  const [reference, setReference] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setBusy(true);
+        setError(null);
+        try {
+          await api(`/admin/listings/${id}/title-search`, "POST", { reference, note });
+          toast("Title search recorded");
+          onDone();
+        } catch (err) {
+          setError((err as Error).message);
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="mt-4 space-y-3 rounded-2xl border border-amber-100 bg-amber-50/70 p-4"
+    >
+      <p className="text-sm font-semibold text-amber-800">
+        Search the title at the Enugu State Ministry of Lands before publishing.
+        {titleReference && <span className="font-normal"> Seller&apos;s title ref: {titleReference}</span>}
+      </p>
+      <div className="grid gap-3 sm:grid-cols-[1fr_2fr]">
+        <Field label="Ministry search reference">
+          <Input required value={reference} onChange={(e) => setReference(e.target.value)} placeholder="ENS/MLS/…" />
+        </Field>
+        <Field label="What the search showed">
+          <Input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="On record in the seller's name; no encumbrance"
+          />
+        </Field>
+      </div>
+      <ErrorText error={error} />
+      <Button type="submit" size="sm" busy={busy}>
+        Record title search
+      </Button>
+    </form>
   );
 }

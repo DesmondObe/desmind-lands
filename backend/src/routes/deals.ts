@@ -17,7 +17,7 @@ import {
 } from "../db/schema.ts";
 import { agreementText, CHECKS, hashAgreement } from "../lib/agreement.ts";
 import { forbidden, HttpError, notFound } from "../lib/errors.ts";
-import { formatKobo } from "../lib/format.ts";
+import { formatKobo, today } from "../lib/format.ts";
 import { id, idParams, parse, requireUser } from "../lib/http.ts";
 import { enqueue } from "../lib/outbox.ts";
 import { agreementPdf } from "../lib/pdf.ts";
@@ -31,6 +31,10 @@ const witnessParams = z.object({ id, witnessId: id });
 const paymentParams = z.object({ id, paymentId: id });
 
 const MAX_WITNESSES_PER_SIDE = 3;
+// Every witness ever named by one side of one deal, removed ones included. Naming a witness
+// sends an email from our domain to an address the user chose; without a ceiling, add-then-
+// remove would turn that into a way to send as many as they liked.
+const MAX_WITNESSES_NAMED_PER_SIDE = 10;
 
 /** Names compared as people type them: case and extra spaces do not matter. */
 const sameName = (a: string, b: string) =>
@@ -356,7 +360,9 @@ export async function dealRoutes(app: FastifyInstance) {
       return {
         deal: { ...deal, agreementText: deal.agreementText },
         role,
-        listing: listing!,
+        // What staff wrote to the seller in review, and which of them searched the title, are
+        // not the buyer's to read.
+        listing: role === "buyer" ? { ...listing!, reviewNote: "", titleSearchedBy: null, reviewedBy: null } : listing!,
         coverUrl: cover ? await app.storage.downloadUrl(cover.storageKey, cover.filename, true) : null,
         seller,
         buyer,
@@ -387,6 +393,9 @@ export async function dealRoutes(app: FastifyInstance) {
       atStage(p, "negotiating");
       const [l] = await tx.select().from(listings).where(eq(listings.id, p.deal.listingId));
       if (l!.status !== "published") throw new HttpError(409, "The seller has accepted another offer on this land.");
+      // As when the deal was opened: a fixed price takes only that price.
+      if (!l!.negotiable && body.amountKobo !== l!.priceKobo)
+        throw new HttpError(422, `The price of this land is fixed at ${formatKobo(l!.priceKobo)}.`);
       await tx
         .update(dealOffers)
         .set({ status: "superseded", respondedAt: sql`now()` })
@@ -420,6 +429,10 @@ export async function dealRoutes(app: FastifyInstance) {
       if (action === "withdraw" && !mine) throw forbidden("Only the person who made an offer can withdraw it.");
       if (action !== "withdraw" && mine) throw forbidden("The other party answers your offer.");
       if (action === "accept") {
+        // One acceptance at a time per piece of land. Without this, two buyers accepting the
+        // seller's counter-offers at the same moment both read "published" and both deals go
+        // to checks. (An advisory lock, not FOR UPDATE: a buyer may not lock the seller's row.)
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${p.deal.listingId}::text, 0))`);
         const [l] = await tx.select().from(listings).where(eq(listings.id, p.deal.listingId));
         if (l!.status !== "published")
           throw new HttpError(409, "The seller has already accepted another offer on this land.");
@@ -512,7 +525,7 @@ export async function dealRoutes(app: FastifyInstance) {
       if (body.checklist && p.role !== "buyer") throw forbidden("The checklist is the buyer's own.");
       if (bank && !(body.bankName && body.bankAccountNumber && body.bankAccountName))
         throw new HttpError(422, "Give the bank, the 10-digit account number and the account name.");
-      if (body.completionDate && body.completionDate < new Date().toISOString().slice(0, 10))
+      if (body.completionDate && body.completionDate < today())
         throw new HttpError(422, "The completion date cannot be in the past.");
       await tx
         .update(deals)
@@ -687,6 +700,14 @@ export async function dealRoutes(app: FastifyInstance) {
         .where(and(eq(dealWitnesses.dealId, dealId), eq(dealWitnesses.side, p.role), isNull(dealWitnesses.removedAt)));
       if (others.length >= MAX_WITNESSES_PER_SIDE)
         throw new HttpError(409, `Each side can have up to ${MAX_WITNESSES_PER_SIDE} witnesses.`);
+      const { rows: named } = await tx.execute<{ n: number }>(
+        sql`select count(*)::int as n from deal_witnesses where deal_id = ${dealId} and side = ${p.role}`,
+      );
+      if ((named[0]?.n ?? 0) >= MAX_WITNESSES_NAMED_PER_SIDE)
+        throw new HttpError(
+          429,
+          "You have named and removed witnesses too many times on this deal. Write to us and we will help.",
+        );
       // A witness is independent: neither party can witness the deal.
       const [seller] = await tx.select({ n: users.fullName }).from(users).where(eq(users.id, p.deal.sellerId));
       const [buyer] = await tx.select({ n: users.fullName }).from(users).where(eq(users.id, p.deal.buyerId));
@@ -779,8 +800,7 @@ export async function dealRoutes(app: FastifyInstance) {
       if (p.deal.paidAt) throw new HttpError(409, "The full price has already been confirmed as paid.");
       if (!sameName(body.signedName, p.me.fullName))
         throw new HttpError(422, `Sign with your full name as on your account: ${p.me.fullName}.`);
-      if (body.paidOn > new Date().toISOString().slice(0, 10))
-        throw new HttpError(422, "The payment date cannot be in the future.");
+      if (body.paidOn > today()) throw new HttpError(422, "The payment date cannot be in the future.");
       if (body.method === "transfer" && !body.proofFileId)
         throw new HttpError(422, "Attach the transfer receipt, so the seller can match it.");
       if (body.proofFileId) {

@@ -4,8 +4,15 @@ import { z } from "zod";
 import { asUser, type Tx } from "../db/client.ts";
 import { files, listings, publicProfiles, savedListings, TITLE_KINDS } from "../db/schema.ts";
 import { forbidden, HttpError, notFound } from "../lib/errors.ts";
-import { idParams, parse, requireUser } from "../lib/http.ts";
+import { idParams, parse, queryFlag, requireUser } from "../lib/http.ts";
+import { SERVED, SERVED_STATES } from "../lib/regions.ts";
 import type { Storage } from "../lib/storage.ts";
+
+const SERVED_LGAS = Object.values(SERVED).flat() as [string, ...string[]];
+const servedStates = sql.join(
+  SERVED_STATES.map((s) => sql`${s}`),
+  sql`, `,
+);
 
 export const FEATURES = [
   "fenced",
@@ -27,8 +34,12 @@ const naira = z.coerce.number().int().positive().max(1e15);
 const listingBody = z.object({
   title: z.string().trim().min(6, "Give the listing a title of at least 6 characters.").max(120),
   description: z.string().trim().max(5000).default(""),
-  state: z.string().trim().min(2).max(60),
-  lga: z.string().trim().max(80).default(""),
+  state: z.enum(SERVED_STATES, {
+    error: `For now, DesMind Lands only lists land in ${SERVED_STATES.join(", ")} State.`,
+  }),
+  lga: z
+    .union([z.literal(""), z.enum(SERVED_LGAS, { error: "Choose the local government area from the list." })])
+    .default(""),
   town: z.string().trim().min(2, "Name the town or area.").max(80),
   addressLine: z.string().trim().max(200).default(""),
   sizeValue: z.coerce.number().positive("Size must be more than zero.").max(1e9),
@@ -46,12 +57,13 @@ const listingBody = z.object({
 const searchQuery = z.object({
   q: z.string().trim().max(100).optional(),
   state: z.string().trim().max(60).optional(),
+  lga: z.string().trim().max(80).optional(),
   minPrice: z.coerce.number().int().nonnegative().optional(),
   maxPrice: z.coerce.number().int().positive().optional(),
   titleKind: z.enum(TITLE_KINDS).optional(),
   landUse: z.enum(["residential", "commercial", "agricultural", "industrial", "mixed"]).optional(),
   sort: z.enum(["newest", "price_asc", "price_desc"]).default("newest"),
-  includeSold: z.coerce.boolean().default(false),
+  includeSold: queryFlag,
   limit: z.coerce.number().int().min(1).max(60).default(24),
   page: z.coerce.number().int().min(1).max(500).default(1),
 });
@@ -60,7 +72,8 @@ const searchQuery = z.object({
 const cardColumns = sql`
   l.id, l.title, l.state, l.lga, l.town, l.size_value::float as "sizeValue", l.size_unit as "sizeUnit",
   l.price_kobo::float8 as "priceKobo", l.negotiable, l.land_use as "landUse", l.title_kind as "titleKind",
-  l.features, l.status, l.published_at as "publishedAt", l.created_at as "createdAt"`;
+  l.features, l.status, l.published_at as "publishedAt", l.created_at as "createdAt",
+  l.title_searched_at as "titleSearchedAt"`;
 
 type Card = {
   id: string;
@@ -78,6 +91,7 @@ type Card = {
   status: string;
   publishedAt: string | null;
   createdAt: string;
+  titleSearchedAt: string | null;
 };
 
 /** The first photo of each listing, as a short-lived URL. */
@@ -115,6 +129,7 @@ export async function listingRoutes(app: FastifyInstance) {
     const q = parse(searchQuery, req.query);
     return asUser(app.db, req.userId, async (tx) => {
       const where = [
+        sql`l.state in (${servedStates})`,
         q.includeSold
           ? sql`l.status in ('published', 'under_offer', 'sold')`
           : sql`l.status in ('published', 'under_offer')`,
@@ -126,6 +141,7 @@ export async function listingRoutes(app: FastifyInstance) {
         );
       }
       if (q.state) where.push(sql`l.state = ${q.state}`);
+      if (q.lga) where.push(sql`l.lga = ${q.lga}`);
       if (q.minPrice) where.push(sql`l.price_kobo >= ${q.minPrice * 100}`);
       if (q.maxPrice) where.push(sql`l.price_kobo <= ${q.maxPrice * 100}`);
       if (q.titleKind) where.push(sql`l.title_kind = ${q.titleKind}`);
@@ -164,7 +180,8 @@ export async function listingRoutes(app: FastifyInstance) {
                count(*) filter (where status = 'sold')::int as sold,
                coalesce(sum(price_kobo) filter (where status = 'sold'), 0)::float8 as sold_value,
                count(distinct state) filter (where status in ('published', 'under_offer'))::int as states
-        from listings`);
+        from listings
+        where state in (${servedStates})`);
       const r = rows[0]!;
       return { live: r.live, sold: r.sold, soldValueKobo: r.sold_value, states: r.states };
     });
@@ -233,6 +250,11 @@ export async function listingRoutes(app: FastifyInstance) {
           latitude: insider ? l.latitude : l.latitude == null ? null : Math.round(l.latitude * 100) / 100,
           longitude: insider ? l.longitude : l.longitude == null ? null : Math.round(l.longitude * 100) / 100,
           reviewNote: mine || admin ? l.reviewNote : "",
+          // That the title was searched, and when, is public; the Ministry's reference and what
+          // the search showed are for people dealing on the land.
+          titleSearchRef: insider ? l.titleSearchRef : "",
+          titleSearchNote: insider ? l.titleSearchNote : "",
+          titleSearchedBy: admin ? l.titleSearchedBy : null,
         },
         photos: await Promise.all(
           photos.map(async (p) => ({
@@ -294,12 +316,21 @@ export async function listingRoutes(app: FastifyInstance) {
       // On the market, what the land *is* (where, how big, which title) was checked by our
       // staff, so changing it means withdrawing and sending it for review again.
       if (["published", "under_offer"].includes(l.status)) {
-        const core = ["state", "lga", "town", "sizeValue", "sizeUnit", "titleKind", "landUse"] as const;
+        const core = [
+          "state",
+          "lga",
+          "town",
+          "sizeValue",
+          "sizeUnit",
+          "titleKind",
+          "titleReference",
+          "landUse",
+        ] as const;
         const changed = core.filter((k) => body[k] !== undefined && String(body[k]) !== String(l[k]));
         if (changed.length)
           throw new HttpError(
             409,
-            "The location, size, use and title of land on the market were checked when it was reviewed. Withdraw the listing to change them, then send it for review again.",
+            "The location, size, use and title of land on the market were checked when it was reviewed, and its title searched at the Ministry of Lands. Withdraw the listing to change them, then send it for review again.",
           );
       }
       await tx.update(listings).set(body).where(eq(listings.id, id));

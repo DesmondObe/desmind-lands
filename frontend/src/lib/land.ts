@@ -73,6 +73,48 @@ export const FEATURES: Record<string, string> = {
   near_express: "Near expressway",
 };
 
+/**
+ * Where DesMind Lands operates. Launch is Enugu State only; to open another state, add it here
+ * with its local government areas (and the same in backend/src/lib/regions.ts).
+ */
+export const SERVED: Record<string, readonly string[]> = {
+  Enugu: [
+    "Aninri",
+    "Awgu",
+    "Enugu East",
+    "Enugu North",
+    "Enugu South",
+    "Ezeagu",
+    "Igbo Etiti",
+    "Igbo Eze North",
+    "Igbo Eze South",
+    "Isi Uzo",
+    "Nkanu East",
+    "Nkanu West",
+    "Nsukka",
+    "Oji River",
+    "Udenu",
+    "Udi",
+    "Uzo-Uwani",
+  ],
+};
+export const SERVED_STATES = Object.keys(SERVED);
+/** The one state at launch: its name, and its local government areas for search and listing. */
+export const HOME_STATE = SERVED_STATES[0] ?? "Enugu";
+export const HOME_LGAS = SERVED[HOME_STATE] ?? [];
+/** Popular areas, for quick search: the city and the towns buyers ask for most. */
+export const POPULAR_AREAS = [
+  "Independence Layout",
+  "Trans-Ekulu",
+  "Emene",
+  "GRA",
+  "New Haven",
+  "Nsukka",
+  "Ngwo",
+  "Abakpa",
+];
+
+/** Every state, for when DesMind Lands grows beyond Enugu. */
 export const STATES = [
   "Abia",
   "Abuja (FCT)",

@@ -6,7 +6,7 @@ import { ListingCard } from "@/components/listing-card";
 import { PlotArt } from "@/components/plot-art";
 import { useRequireSignIn } from "@/components/session";
 import { Loading, Page } from "@/components/shell";
-import { Badge, ButtonLink, cx, Empty, Icon, icons, statusTone } from "@/components/ui";
+import { Badge, Button, ButtonLink, cx, Empty, Icon, icons, statusTone } from "@/components/ui";
 import { api, type ListingCard as Card, type DealRow } from "@/lib/api";
 import { formatKobo, LISTING_STATUS, STAGE_LABEL, STAGES, timeAgo } from "@/lib/land";
 
@@ -19,17 +19,50 @@ export default function Dashboard() {
   const [saved, setSaved] = useState<Card[] | null>(null);
   const [tab, setTab] = useState<Tab>("deals");
 
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `attempt` loads again on "Try again".
   useEffect(() => {
     if (!me) return;
-    api<{ deals: DealRow[] }>("/me/deals").then((r) => setDeals(r.deals));
-    api<{ listings: Card[] }>("/me/listings").then((r) => setListings(r.listings));
-    api<{ listings: Card[] }>("/me/saved").then((r) => setSaved(r.listings));
-  }, [me]);
+    let current = true;
+    setError(null);
+    Promise.all([
+      api<{ deals: DealRow[] }>("/me/deals"),
+      api<{ listings: Card[] }>("/me/listings"),
+      api<{ listings: Card[] }>("/me/saved"),
+    ]).then(
+      ([d, l, s]) => {
+        if (!current) return;
+        setDeals(d.deals);
+        setListings(l.listings);
+        setSaved(s.listings);
+      },
+      (err) => {
+        if (current) setError(err.message);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [me, attempt]);
 
   useEffect(() => {
     if (deals && listings && !deals.length && listings.length) setTab("listings");
   }, [deals, listings]);
 
+  if (error && !(deals && listings && saved))
+    return (
+      <Page>
+        <div className="mx-auto max-w-md py-16 text-center">
+          <p className="font-display text-3xl">Your dashboard did not load</p>
+          <p className="mt-3 text-ink-soft">{error}</p>
+          <Button className="mt-8" onClick={() => setAttempt((n) => n + 1)}>
+            Try again
+          </Button>
+        </div>
+      </Page>
+    );
   if (!me || !deals || !listings || !saved) return <Loading />;
 
   const open = deals.filter((d) => !["completed", "cancelled"].includes(d.stage));
@@ -93,6 +126,7 @@ export default function Dashboard() {
           <button
             key={key}
             type="button"
+            aria-current={tab === key ? "page" : undefined}
             onClick={() => setTab(key)}
             className={cx(
               "-mb-px border-b-2 px-5 py-3 text-sm font-semibold transition",
