@@ -15,6 +15,8 @@
     "dev:worker": "npm run worker:dev --workspace @lands/backend",
     "dev:frontend": "npm run dev --workspace @lands/frontend",
     "db:migrate": "npm run db:migrate --workspace @lands/backend",
+    "build": "npm run build --workspace @lands/backend && npm run build --workspace @lands/frontend",
+    "start": "node scripts/start.mjs",
     "test": "npm test --workspace @lands/backend",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "biome check .",
