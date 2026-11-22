@@ -43,7 +43,7 @@ const CHECKS = [
   ["Use a lawyer", "A lawyer of your own choosing can read the papers, and prepare the Deed of Assignment after."],
 ];
 
-const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-6xl";
+const H2 = "font-display text-3xl leading-[1.05] tracking-[-0.02em] text-ink sm:text-[2.75rem]";
 
 export default function HowItWorks() {
   return (
@@ -52,7 +52,7 @@ export default function HowItWorks() {
         <PhotoGround name="enugu-homes" eager />
         <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-4 pt-40 pb-14 sm:px-6 sm:pb-20">
           <Eyebrow light>How it works · Enugu State</Eyebrow>
-          <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
+          <h1 className="mt-6 max-w-5xl font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl">
             A seller. A buyer. <span className="italic">And witnesses.</span>
           </h1>
           <p className="mt-8 text-xl text-white/85">No agent. No commission. Offer to handover.</p>
@@ -60,7 +60,7 @@ export default function HowItWorks() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid gap-x-20 gap-y-24 pt-24 sm:pt-32 lg:grid-cols-2">
+        <div className="grid gap-x-20 gap-y-16 pt-16 sm:pt-24 lg:grid-cols-2">
           {(
             [
               ["sellers", "For sellers", "Selling.", SELLERS],
@@ -87,7 +87,7 @@ export default function HowItWorks() {
           ))}
         </div>
 
-        <section id="title-search" className="scroll-mt-28 pt-24 sm:pt-32">
+        <section id="title-search" className="scroll-mt-28 pt-16 sm:pt-24">
           <Eyebrow>Our title search</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
             Every title. <span className="italic">Searched first.</span>
@@ -120,7 +120,7 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        <section id="witnesses" className="scroll-mt-28 pt-24 sm:pt-32">
+        <section id="witnesses" className="scroll-mt-28 pt-16 sm:pt-24">
           <Eyebrow>Witnesses</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
             Every signature, <span className="italic">witnessed.</span>
@@ -148,7 +148,7 @@ export default function HowItWorks() {
           </div>
         </section>
 
-        <section id="checks" className="scroll-mt-28 pt-24 sm:pt-32">
+        <section id="checks" className="scroll-mt-28 pt-16 sm:pt-24">
           <Eyebrow>Before you pay</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
             Six checks. <span className="italic">Then pay.</span>
@@ -172,7 +172,7 @@ export default function HowItWorks() {
         <PhotoGround name="enugu-road" />
         <div className="relative mx-auto flex min-h-[70vh] w-full max-w-7xl flex-col justify-end px-4 py-14 sm:px-6 sm:py-20">
           <Eyebrow light>Payment</Eyebrow>
-          <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
+          <p className="mt-6 max-w-5xl font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl">
             Money goes <span className="italic">straight to the seller.</span>
           </p>
           <p className="mt-6 max-w-2xl text-lg text-white/85">

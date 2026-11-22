@@ -81,31 +81,46 @@ export function Nav() {
   ];
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
+  const initials = me?.user.fullName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
+  const leave = async () => {
+    await signOut();
+    router.push("/");
+  };
+
   return (
-    <header
-      className={cx(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300 print:hidden",
-        overHero
-          ? "border-b border-transparent bg-transparent"
-          : "border-b border-line bg-canvas/80 backdrop-blur-xl backdrop-saturate-150",
-      )}
-    >
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-6 px-4 sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6 print:hidden">
+      {/* One floating bar: glass over a photographed hero, paper everywhere else. */}
+      <div
+        className={cx(
+          "relative mx-auto flex h-14 max-w-7xl items-center gap-4 rounded-full pr-2 pl-4 ring-1 backdrop-blur-xl transition-[background-color,box-shadow] duration-300 sm:pl-5",
+          overHero
+            ? "bg-black/35 ring-white/20"
+            : "bg-canvas/90 shadow-[0_10px_30px_-18px_oklch(0_0_0/0.45)] ring-line backdrop-saturate-150",
+        )}
+      >
         <Link href="/" aria-label="DesMind Lands, home">
           <Logo inverted={overHero} />
         </Link>
-        <nav className="ml-6 hidden items-center gap-1 lg:flex">
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex">
           {links.map(([href, label]) => (
             <Link
               key={href}
               href={href}
+              aria-current={active(href) ? "page" : undefined}
               className={cx(
-                "relative rounded-full px-3.5 py-2 text-[14px] font-semibold transition",
+                "flex items-center rounded-full px-3.5 py-1.5 text-[14px] font-semibold whitespace-nowrap transition",
                 overHero
-                  ? "text-white/75 hover:text-white"
+                  ? active(href)
+                    ? "bg-white/15 text-white"
+                    : "text-white hover:bg-white/10"
                   : active(href)
-                    ? "text-ink"
-                    : "text-ink-soft hover:text-ink",
+                    ? "bg-ink text-canvas"
+                    : "text-ink hover:bg-sunken",
               )}
             >
               {label}
@@ -113,76 +128,53 @@ export function Nav() {
                 <span
                   className={cx(
                     "ml-1.5 inline-grid min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold",
-                    overHero ? "bg-white text-black" : "bg-accent text-on-accent",
+                    overHero || active(href) ? "bg-white text-black" : "bg-ink text-canvas",
                   )}
                 >
                   {me.openDeals}
                 </span>
               )}
-              {active(href) && !overHero && (
-                <span className="absolute inset-x-3.5 -bottom-[17px] h-0.5 rounded-full bg-accent" aria-hidden="true" />
-              )}
             </Link>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/lands"
-            className={cx(
-              "mr-2 hidden items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold xl:flex",
-              overHero ? "bg-white/8 text-white/80 ring-1 ring-white/15" : "bg-sunken text-ink-soft ring-1 ring-line",
-            )}
-          >
-            <span
-              className={cx("size-1.5 animate-pulse-dot rounded-full", overHero ? "bg-white" : "bg-accent")}
-              aria-hidden="true"
-            />
-            Now in Enugu State
-          </Link>
+        <div className="ml-auto flex items-center gap-1">
           <ThemeToggle light={overHero} />
           {me ? (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link
-                href="/account"
-                className={cx(
-                  "grid size-10 place-items-center rounded-full text-sm font-bold",
-                  overHero ? "bg-white/10 text-white ring-1 ring-white/20" : "bg-ink text-canvas",
-                )}
-                title={me.user.fullName}
-              >
-                {me.user.fullName
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map((p) => p[0])
-                  .join("")
-                  .toUpperCase()}
-              </Link>
+            <div className="hidden items-center gap-1 sm:flex">
               <button
                 type="button"
-                onClick={async () => {
-                  await signOut();
-                  router.push("/");
-                }}
+                onClick={leave}
                 className={cx(
                   "rounded-full px-3 py-2 text-[13px] font-semibold",
-                  overHero ? "text-white/70 hover:text-white" : "text-ink-faint hover:text-ink",
+                  overHero ? "text-white hover:bg-white/10" : "text-ink hover:bg-sunken",
                 )}
               >
                 Sign out
               </button>
+              <Link
+                href="/account"
+                className={cx(
+                  "grid size-10 place-items-center rounded-full text-[13px] font-bold",
+                  overHero ? "bg-white text-black" : "bg-ink text-canvas",
+                )}
+                title={me.user.fullName}
+                aria-label="Your account"
+              >
+                {initials}
+              </Link>
             </div>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="hidden items-center gap-1 sm:flex">
               <Link
                 href="/login"
                 className={cx(
-                  "rounded-full px-4 py-2 text-[14px] font-semibold",
-                  overHero ? "text-white/80 hover:text-white" : "text-ink-soft hover:text-ink",
+                  "rounded-full px-3.5 py-2 text-[14px] font-semibold",
+                  overHero ? "text-white hover:bg-white/10" : "text-ink hover:bg-sunken",
                 )}
               >
                 Sign in
               </Link>
-              <ButtonLink href="/sell" size="sm" variant={overHero ? "light" : "primary"}>
+              <ButtonLink href="/sell" size="sm" variant={overHero ? "light" : "primary"} className="h-10 px-5">
                 List your land
               </ButtonLink>
             </div>
@@ -208,18 +200,24 @@ export function Nav() {
               {open ? (
                 <path d="M5 5l10 10M15 5 5 15" strokeLinecap="round" />
               ) : (
-                <path d="M3 6h14M3 10h14M3 14h14" strokeLinecap="round" />
+                <path d="M3 7h14M3 13h14" strokeLinecap="round" />
               )}
             </svg>
           </button>
         </div>
       </div>
       {open && (
-        <div className="animate-fade-in border-t border-line bg-canvas px-4 pt-3 pb-6 lg:hidden">
+        <div className="mx-auto mt-2 max-w-7xl animate-fade-in rounded-3xl bg-canvas px-5 pt-2 pb-5 shadow-[0_20px_40px_-20px_oklch(0_0_0/0.5)] ring-1 ring-line lg:hidden">
           <nav className="flex flex-col">
             {links.map(([href, label]) => (
-              <Link key={href} href={href} className="border-b border-line py-4 font-display text-2xl text-ink">
+              <Link
+                key={href}
+                href={href}
+                aria-current={active(href) ? "page" : undefined}
+                className="flex items-center justify-between border-b border-line py-3.5 text-[17px] font-semibold text-ink"
+              >
                 {label}
+                <span aria-hidden="true">→</span>
               </Link>
             ))}
           </nav>
@@ -231,11 +229,8 @@ export function Nav() {
                 </ButtonLink>
                 <button
                   type="button"
-                  onClick={async () => {
-                    await signOut();
-                    router.push("/");
-                  }}
-                  className="flex-1 rounded-full border border-line-strong py-3 text-sm font-semibold"
+                  onClick={leave}
+                  className="flex-1 rounded-full border border-line-strong py-3 text-sm font-semibold text-ink"
                 >
                   Sign out
                 </button>

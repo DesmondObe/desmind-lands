@@ -9,7 +9,7 @@ export default function NotFound() {
       </div>
       <div>
         <p className="font-mono text-sm text-earth-600">404 · beacon not found</p>
-        <h1 className="mt-3 font-display text-5xl text-ink">This plot is not on the map.</h1>
+        <h1 className="mt-3 font-display text-4xl text-ink">This plot is not on the map.</h1>
         <p className="mt-4 text-ink-soft">The page may have moved, or the land has been taken off the market.</p>
         <ButtonLink href="/lands" className="mt-8">
           Browse land for sale

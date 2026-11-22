@@ -191,7 +191,7 @@ export function PageTitle({
     <div className="mb-10 flex animate-rise flex-wrap items-end justify-between gap-5">
       <div>
         {eyebrow && <Eyebrow className="mb-4">{eyebrow}</Eyebrow>}
-        <h1 className="font-display text-[2.6rem] leading-[1.04] font-normal text-ink sm:text-[3.4rem]">{title}</h1>
+        <h1 className="font-display text-3xl leading-[1.1] font-normal text-ink sm:text-[2.5rem]">{title}</h1>
         {subtitle && <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-soft">{subtitle}</p>}
       </div>
       {action}
@@ -226,7 +226,7 @@ export function Empty({ title, children, action }: { title: string; children?: R
  */
 export function LogoMark({ className, inverted }: { className?: string; inverted?: boolean }) {
   return (
-    <svg viewBox="0 0 32 32" className={cx("size-9 shrink-0", className)} aria-hidden="true">
+    <svg viewBox="0 0 32 32" className={cx("size-8 shrink-0", className)} aria-hidden="true">
       {inverted ? (
         <rect x="0.6" y="0.6" width="30.8" height="30.8" rx="9" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
       ) : (
@@ -249,12 +249,12 @@ export function LogoMark({ className, inverted }: { className?: string; inverted
 
 export function Logo({ className, inverted }: { className?: string; inverted?: boolean }) {
   return (
-    <span className={cx("inline-flex items-center gap-3", className)}>
+    <span className={cx("inline-flex items-center gap-2.5", className)}>
       <LogoMark inverted={inverted} />
       <span className="flex flex-col leading-none">
         <span
           className={cx(
-            "font-display text-[21px] font-medium tracking-[-0.01em]",
+            "font-display text-[19px] font-medium tracking-[-0.01em]",
             inverted ? "text-white" : "text-ink",
           )}
         >

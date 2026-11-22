@@ -41,7 +41,7 @@ const PROMISES: [string, string][] = [
 ];
 
 const WRAP = "mx-auto w-full max-w-7xl px-4 sm:px-6";
-const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-6xl";
+const H2 = "font-display text-3xl leading-[1.05] tracking-[-0.02em] text-ink sm:text-[2.75rem]";
 
 export default function Home() {
   const router = useRouter();
@@ -76,7 +76,7 @@ export default function Home() {
         <div className={`${WRAP} relative flex flex-1 flex-col justify-end pt-40 pb-12`}>
           <div className="animate-rise">
             <Eyebrow light>Enugu State</Eyebrow>
-            <h1 className="mt-6 font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl lg:text-8xl">
+            <h1 className="mt-6 font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl lg:text-6xl">
               Sell your land.
               <br />
               <span className="italic">Keep every naira.</span>
@@ -124,7 +124,7 @@ export default function Home() {
             ].map(([big, small]) => (
               <div key={small}>
                 <dt className="sr-only">{small}</dt>
-                <dd className="font-display text-4xl text-white tabular sm:text-6xl">{big}</dd>
+                <dd className="font-display text-3xl text-white tabular sm:text-4xl">{big}</dd>
                 <dd className="mt-1 text-[13px] leading-snug text-white/70">{small}</dd>
               </div>
             ))}
@@ -134,7 +134,7 @@ export default function Home() {
 
       {/* ---------------------------------------------------------------- What this is */}
       <section className={`${WRAP} py-24 sm:py-32`}>
-        <p className="max-w-5xl font-display text-4xl leading-[1.06] tracking-[-0.02em] text-ink sm:text-6xl">
+        <p className="max-w-5xl font-display text-2xl leading-[1.15] tracking-[-0.015em] text-ink sm:text-4xl">
           Land in Enugu, sold by the person who owns it.{" "}
           <span className="text-ink-faint">No agent in the middle. No 10% taken from either side.</span>
         </p>
@@ -336,7 +336,7 @@ function PlotSheet() {
           </dl>
           <div className="mt-6 flex items-baseline justify-between gap-6">
             <span className="font-mono text-xs text-ink-faint">Example</span>
-            <span className="font-display text-5xl text-ink tabular sm:text-6xl">₦13.5m</span>
+            <span className="font-display text-4xl text-ink tabular sm:text-5xl">₦13.5m</span>
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ function Calculator() {
         <div>
           <Eyebrow>Work it out</Eyebrow>
           <p className="mt-10 text-sm text-ink-soft">Your price</p>
-          <p className="mt-1 font-display text-6xl leading-none tracking-[-0.03em] text-ink tabular sm:text-6xl">
+          <p className="mt-1 font-display text-4xl leading-none tracking-[-0.03em] text-ink tabular sm:text-5xl">
             {formatKobo(kobo)}
           </p>
           <input
@@ -405,7 +405,7 @@ function Calculator() {
           ))}
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-ink pt-6">
             <dt className="text-lg text-ink">Stays with you both</dt>
-            <dd className="font-display text-5xl leading-none tracking-[-0.03em] text-ink tabular sm:text-6xl">
+            <dd className="font-display text-4xl leading-none tracking-[-0.03em] text-ink tabular sm:text-5xl">
               {formatKobo(each * 2)}
             </dd>
           </div>
@@ -442,7 +442,7 @@ function Columns({
     <ol className={`mt-10 grid gap-x-6 gap-y-8 sm:grid-cols-2 ${className ?? ""}`}>
       {items.map(([title, body], i) => (
         <li key={title} className="border-t-2 border-ink pt-4">
-          <h3 className="flex items-baseline gap-3 font-display text-3xl text-ink">
+          <h3 className="flex items-baseline gap-3 font-display text-2xl text-ink">
             {numbered && <span className="text-xl tabular">{i + 1}</span>}
             {title}
           </h3>
@@ -479,9 +479,7 @@ function PhotoBand({
       <PhotoGround name={name} />
       <div className={`${WRAP} relative flex min-h-[70vh] flex-col justify-end py-12 sm:py-16`}>
         <Eyebrow light>{eyebrow}</Eyebrow>
-        <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
-          {children}
-        </p>
+        <p className="mt-6 max-w-5xl font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl">{children}</p>
         {note && <p className="mt-6 text-xl text-white/85">{note}</p>}
         {action && <div className="mt-8 flex flex-wrap gap-3">{action}</div>}
       </div>

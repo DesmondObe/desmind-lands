@@ -77,7 +77,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="animate-rise">
           <p className="text-sm font-semibold text-earth-600">Welcome, {first}</p>
-          <h1 className="mt-2 font-display text-5xl text-ink">
+          <h1 className="mt-2 font-display text-4xl text-ink">
             {yourMove.length ? (
               <>
                 {yourMove.length} {yourMove.length === 1 ? "deal needs" : "deals need"} you

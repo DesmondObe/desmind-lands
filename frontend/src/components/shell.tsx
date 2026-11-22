@@ -33,7 +33,7 @@ export function AuthShell({ children, title, subtitle }: { children: ReactNode; 
         <PhotoGround name="nsukka-homes" />
         <div className="relative">
           <Eyebrow light>DesMind Lands · Enugu State</Eyebrow>
-          <p className="mt-6 font-display text-5xl leading-[1] tracking-[-0.025em]">
+          <p className="mt-6 font-display text-4xl leading-[1.05] tracking-[-0.025em]">
             Owner to buyer. <span className="italic">Every title searched first.</span>
           </p>
           <ul className="mt-10 grid grid-cols-3 gap-6 border-t border-white/25 pt-5 text-sm text-white/80">
@@ -48,7 +48,7 @@ export function AuthShell({ children, title, subtitle }: { children: ReactNode; 
           <Link href="/" className="mb-10 inline-block lg:hidden">
             <Logo />
           </Link>
-          <h1 className="font-display text-[2.6rem] leading-tight text-ink">{title}</h1>
+          <h1 className="font-display text-4xl leading-tight text-ink">{title}</h1>
           {subtitle && <p className="mt-3 text-[16px] text-ink-soft">{subtitle}</p>}
           <div className="mt-8">{children}</div>
         </div>
