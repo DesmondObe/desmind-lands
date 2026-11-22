@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import type { ReactNode } from "react";
 import { PhotoGround } from "@/components/photo";
-import { ButtonLink, Eyebrow } from "@/components/ui";
+import { Icon, icons } from "@/components/ui";
 
 export const metadata: Metadata = {
   title: "How it works",
@@ -43,42 +45,92 @@ const CHECKS = [
   ["Use a lawyer", "A lawyer of your own choosing can read the papers, and prepare the Deed of Assignment after."],
 ];
 
-const H2 = "font-display text-3xl leading-[1.05] tracking-[-0.02em] text-ink sm:text-[2.75rem]";
+const SEARCHED = [
+  "The document is genuine",
+  "The seller is the owner on record",
+  "No encumbrance recorded",
+  "No government acquisition recorded",
+];
+
+const WITNESSES = [
+  ["Who", "Each side names at least one adult who knows them: family, a friend, a lawyer. Never the other party."],
+  [
+    "How",
+    "We email them a private link, or you send it on WhatsApp. They read the agreement and sign. No account needed.",
+  ],
+  [
+    "Why",
+    "A witness attests that the person signing is who they say, signing freely. It is the safeguard agents never gave.",
+  ],
+];
+
+const COLUMN = "mx-auto w-full max-w-5xl px-5 sm:px-8";
+const H2 = "font-display text-[2rem] leading-[1.1] tracking-[-0.02em] text-ink sm:text-[2.5rem]";
+const BODY = "text-[15px] leading-relaxed text-ink-soft";
+const SECTION = `${COLUMN} scroll-mt-24 pt-20 sm:pt-28`;
+
+function Heading({ children }: { children: ReactNode }) {
+  return (
+    <div>
+      <h2 className={H2}>{children}</h2>
+      <span className="mt-5 block h-0.5 w-12 bg-ink" aria-hidden="true" />
+    </div>
+  );
+}
+
+function ArrowLink({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2.5 border border-ink px-5 py-2.5 text-[15px] font-semibold text-ink transition hover:bg-ink hover:text-canvas"
+    >
+      {children}
+      <Icon d={icons.arrow} className="size-4" />
+    </Link>
+  );
+}
 
 export default function HowItWorks() {
   return (
     <>
-      <section className="relative flex min-h-[80vh] flex-col overflow-hidden bg-black text-white">
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-black text-white">
         <PhotoGround name="enugu-homes" eager />
-        <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-4 pt-40 pb-14 sm:px-6 sm:pb-20">
-          <Eyebrow light>How it works · Enugu State</Eyebrow>
-          <h1 className="mt-6 max-w-5xl font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl">
+        <div className="relative mx-auto flex w-full max-w-3xl flex-1 animate-rise flex-col items-center justify-center px-5 pt-28 pb-24 text-center">
+          <h1 className="font-display text-[2.5rem] leading-[1.05] tracking-[-0.025em] sm:text-[3.4rem]">
             A seller. A buyer. <span className="italic">And witnesses.</span>
           </h1>
-          <p className="mt-8 text-xl text-white/85">No agent. No commission. Offer to handover.</p>
+          <p className="mt-4 text-lg text-white sm:text-xl">No agent. No commission. Offer to handover.</p>
         </div>
+        <a
+          href="#sellers"
+          className="absolute inset-x-0 bottom-16 mx-auto flex w-fit flex-col items-center gap-2 text-xs text-white"
+        >
+          Scroll down
+          <span className="flex h-9 w-5 justify-center rounded-full border border-white pt-1.5" aria-hidden="true">
+            <span className="h-2 w-0.5 animate-bounce rounded-full bg-white" />
+          </span>
+        </a>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="grid gap-x-20 gap-y-16 pt-16 sm:pt-24 lg:grid-cols-2">
+      <div className="relative -mt-10 -mb-24 rounded-t-[2.5rem] bg-canvas sm:rounded-t-[3.5rem]">
+        <div className={`${COLUMN} grid gap-x-16 lg:grid-cols-2`}>
           {(
             [
-              ["sellers", "For sellers", "Selling.", SELLERS],
-              ["buyers", "For buyers", "Buying.", BUYERS],
+              ["sellers", "Selling", SELLERS],
+              ["buyers", "Buying", BUYERS],
             ] as const
-          ).map(([id, eyebrow, title, steps]) => (
-            <section key={id} id={id} className="scroll-mt-28">
-              <Eyebrow>{eyebrow}</Eyebrow>
-              <h2 className={`mt-5 ${H2}`}>{title}</h2>
-              <ol className="mt-10 border-b border-line">
+          ).map(([id, title, steps]) => (
+            <section key={id} id={id} className="scroll-mt-24 pt-20 sm:pt-28">
+              <Heading>{title}</Heading>
+              <ol className="mt-8">
                 {steps.map(([t, b], i) => (
-                  <li key={t} className="flex gap-6 border-t border-line py-5">
-                    <span className="w-6 shrink-0 pt-1.5 font-mono text-xs text-ink-faint">
+                  <li key={t} className="flex gap-5 border-t border-line py-4">
+                    <span className="w-7 shrink-0 text-[13px] font-bold tracking-[0.1em] text-ink-faint">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <div>
-                      <h3 className="font-display text-2xl text-ink">{t}</h3>
-                      <p className="mt-1 leading-relaxed text-ink-soft">{b}</p>
+                      <h3 className="text-[17px] font-semibold text-ink">{t}</h3>
+                      <p className="mt-1 text-[14px] leading-relaxed text-ink-soft">{b}</p>
                     </div>
                   </li>
                 ))}
@@ -87,108 +139,102 @@ export default function HowItWorks() {
           ))}
         </div>
 
-        <section id="title-search" className="scroll-mt-28 pt-16 sm:pt-24">
-          <Eyebrow>Our title search</Eyebrow>
-          <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Every title. <span className="italic">Searched first.</span>
-          </h2>
-          <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:gap-20">
-            <div>
-              <p className="text-lg leading-relaxed text-ink-soft">
+        <section id="title-search" className="scroll-mt-24 pt-20 sm:pt-28">
+          <h2 className={`${COLUMN} text-center ${H2}`}>Every title, searched first</h2>
+          <div className="relative mx-3 mt-10 overflow-hidden rounded-[2rem] bg-black text-white sm:mx-6">
+            <PhotoGround name="nsukka-town" />
+            <div className={`${COLUMN} relative flex min-h-[30rem] flex-col justify-end py-12`}>
+              <p className="w-fit max-w-xs bg-white px-5 py-4 text-2xl leading-tight font-semibold tracking-tight text-black">
+                Searched at the Ministry of Lands
+              </p>
+              <p className="mt-3 w-fit bg-black px-4 py-2.5 text-[13px] font-semibold text-white">
+                Before anything is listed
+              </p>
+              <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-white">
                 When a seller sends land for review, our staff take its title to the Enugu State Ministry of Lands. Only
                 then does the land go on the market, marked with the date of the search.
               </p>
-              <p className="mt-6 text-sm leading-relaxed text-ink-faint">
-                Change the title, its reference or where the land is, and the search lapses: the listing comes back to
-                us for a new one. A search reports what the Ministry&apos;s records showed on the day. It is not a
-                guarantee of title, so a buyer still visits the land and takes their own legal advice.
-              </p>
             </div>
-            <ul className="self-start border-b border-line">
-              {[
-                "The document is genuine",
-                "The seller is the owner on record",
-                "No encumbrance recorded",
-                "No government acquisition recorded",
-              ].map((t, i) => (
-                <li key={t} className="flex items-baseline gap-6 border-t border-line py-4 text-lg text-ink">
-                  <span className="font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</span>
+          </div>
+          <div className={`${COLUMN} mt-10 grid gap-10 lg:grid-cols-2 lg:gap-16`}>
+            <ul>
+              {SEARCHED.map((t, i) => (
+                <li key={t} className="flex items-baseline gap-5 border-t border-line py-3.5 text-[15px] text-ink">
+                  <span className="text-[13px] font-bold tracking-[0.1em] text-ink-faint">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   {t}
                 </li>
               ))}
             </ul>
+            <p className="text-[14px] leading-relaxed text-ink-soft">
+              Change the title, its reference or where the land is, and the search lapses: the listing comes back to us
+              for a new one. A search reports what the Ministry&apos;s records showed on the day. It is not a guarantee
+              of title, so a buyer still visits the land and takes their own legal advice.
+            </p>
           </div>
         </section>
 
-        <section id="witnesses" className="scroll-mt-28 pt-16 sm:pt-24">
-          <Eyebrow>Witnesses</Eyebrow>
-          <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Every signature, <span className="italic">witnessed.</span>
-          </h2>
-          <div className="mt-14 grid gap-x-8 gap-y-10 md:grid-cols-3">
-            {[
-              [
-                "Who",
-                "Each side names at least one adult who knows them: family, a friend, a lawyer. Never the other party.",
-              ],
-              [
-                "How",
-                "We email them a private link, or you send it on WhatsApp. They read the agreement and sign. No account needed.",
-              ],
-              [
-                "Why",
-                "A witness attests that the person signing is who they say, signing freely. It is the safeguard agents never gave.",
-              ],
-            ].map(([t, b]) => (
-              <div key={t} className="border-t border-ink pt-5">
-                <p className="font-display text-2xl text-ink">{t}</p>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{b}</p>
-              </div>
-            ))}
-          </div>
+        <section id="witnesses" className={SECTION}>
+          <Heading>Every signature, witnessed</Heading>
+          <ol className="mt-12 grid gap-5 sm:grid-cols-3 sm:pb-10">
+            {WITNESSES.map(([t, b], i) => {
+              const dark = i === 1;
+              return (
+                <li
+                  key={t}
+                  className={`flex min-h-60 flex-col rounded-2xl p-6 ${dark ? "bg-ink text-canvas sm:translate-y-10" : "bg-sunken text-ink"}`}
+                >
+                  <h3 className="text-lg font-semibold tracking-tight">{t}</h3>
+                  <p className={`mt-3 text-[14px] leading-relaxed ${dark ? "text-canvas" : "text-ink-soft"}`}>{b}</p>
+                  <span className={`mt-auto pt-8 text-4xl font-semibold ${dark ? "text-canvas" : "text-ink-faint"}`}>
+                    #{i + 1}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
         </section>
 
-        <section id="checks" className="scroll-mt-28 pt-16 sm:pt-24">
-          <Eyebrow>Before you pay</Eyebrow>
-          <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Six checks. <span className="italic">Then pay.</span>
-          </h2>
-          <p className="mt-6 max-w-xl text-lg text-ink-soft">
+        <section id="checks" className={SECTION}>
+          <h2 className={`text-center ${H2}`}>Six checks. Then pay.</h2>
+          <p className={`mx-auto mt-4 max-w-md text-center ${BODY}`}>
             Our title search is the first check, not the last. The deal room keeps the list.
           </p>
-          <ol className="mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          <ol className="mt-12 grid gap-x-8 gap-y-10 text-center sm:grid-cols-2 lg:grid-cols-3">
             {CHECKS.map(([t, b], i) => (
               <li key={t} className="border-t border-ink pt-5">
-                <p className="font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</p>
-                <h3 className="mt-8 font-display text-2xl text-ink">{t}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{b}</p>
+                <p className="text-[13px] font-bold tracking-[0.2em] text-ink-faint">STEP 0{i + 1}</p>
+                <h3 className="mt-4 text-lg font-semibold text-ink">{t}</h3>
+                <p className="mx-auto mt-2 max-w-[17rem] text-[13px] leading-relaxed text-ink-soft">{b}</p>
               </li>
             ))}
           </ol>
         </section>
-      </div>
 
-      <section className="relative mx-3 mt-24 overflow-hidden rounded-[2rem] bg-black text-white sm:mx-6 sm:mt-32">
-        <PhotoGround name="enugu-road" />
-        <div className="relative mx-auto flex min-h-[70vh] w-full max-w-7xl flex-col justify-end px-4 py-14 sm:px-6 sm:py-20">
-          <Eyebrow light>Payment</Eyebrow>
-          <p className="mt-6 max-w-5xl font-display text-4xl leading-[1] tracking-[-0.025em] sm:text-5xl">
-            Money goes <span className="italic">straight to the seller.</span>
-          </p>
-          <p className="mt-6 max-w-2xl text-lg text-white/85">
-            We never hold it. Pay only into the account in the signed agreement. If anyone names another account, even
-            claiming to be us, stop and write in the deal room first.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="/lands" variant="light" size="lg">
-              Find land
-            </ButtonLink>
-            <ButtonLink href="/sell" size="lg" className="bg-white/10 ring-1 ring-white/25 hover:bg-white/20">
-              List your land
-            </ButtonLink>
+        <section className={SECTION}>
+          <div className="relative overflow-hidden rounded-[2rem] bg-black px-6 py-12 text-white sm:px-12 sm:py-16">
+            <PhotoGround name="enugu-road" />
+            <div className="relative">
+              <h2 className="font-display text-[2rem] leading-[1.1] tracking-[-0.02em] sm:text-[2.5rem]">
+                Money goes <span className="italic">straight to the seller.</span>
+              </h2>
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white">
+                We never hold it. Pay only into the account in the signed agreement. If anyone names another account,
+                even claiming to be us, stop and write in the deal room first.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section className="mt-20 bg-sunken py-16 text-center sm:mt-28">
+          <h2 className="px-5 text-2xl font-semibold tracking-tight text-ink sm:text-[1.75rem]">Ready to begin?</h2>
+          <div className="mt-6 flex flex-wrap justify-center gap-3 px-5">
+            <ArrowLink href="/lands">Find land</ArrowLink>
+            <ArrowLink href="/sell">List your land</ArrowLink>
+          </div>
+        </section>
+      </div>
     </>
   );
 }

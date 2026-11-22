@@ -3,6 +3,7 @@ import { Fraunces, Geist_Mono, Manrope } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Nav } from "@/components/nav";
+import { PhotoGround } from "@/components/photo";
 import { SessionProvider } from "@/components/session";
 import { Toaster } from "@/components/toast";
 import { Logo } from "@/components/ui";
@@ -88,13 +89,14 @@ function Footer() {
   ];
   return (
     <footer className="deep-ground relative mt-24 overflow-hidden border-t border-white/10 text-white/70 print:hidden">
-      <div className="survey-grid absolute inset-0 [--grid-line:oklch(1_0_0/0.035)]" aria-hidden="true" />
+      <PhotoGround name="nsukka-grass" />
+      <div className="absolute inset-0 bg-black/45" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-10 sm:px-6">
         <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
           <div className="space-y-6">
             <Logo inverted />
             <p className="max-w-sm font-display text-2xl leading-snug text-white">
-              Land, sold directly. <span className="text-white/55 italic">No agents. No 10% cut.</span>
+              Land, sold directly. <span className="italic">No agents. No 10% cut.</span>
             </p>
             <p className="inline-flex items-center gap-2 rounded-full bg-white/6 px-3 py-1.5 text-xs font-semibold text-white/75 ring-1 ring-white/10">
               <span className="size-1.5 rounded-full bg-white" aria-hidden="true" />

@@ -5,7 +5,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { CardSkeleton, ListingCard } from "@/components/listing-card";
 import { Photo } from "@/components/photo";
 import { Page } from "@/components/shell";
-import { Button, cx, Empty, ErrorText, Eyebrow, Icon, icons, Select } from "@/components/ui";
+import { Button, cx, Empty, ErrorText, Icon, icons, Select } from "@/components/ui";
 import { api, type ListingCard as Card } from "@/lib/api";
 import { HOME_LGAS, LAND_USE, POPULAR_AREAS, TITLE_LABEL } from "@/lib/land";
 
@@ -91,11 +91,13 @@ function Market() {
     <Page wide>
       <div className="grid animate-rise items-end gap-8 lg:grid-cols-[1fr_auto]">
         <div>
-          <Eyebrow>Land for sale in Enugu State</Eyebrow>
-          <h1 className="mt-5 font-display text-3xl leading-[1.05] tracking-[-0.02em] text-ink sm:text-[2.75rem]">
+          <h1 className="font-display text-[2rem] leading-[1.1] tracking-[-0.02em] text-ink sm:text-[2.5rem]">
             Buy from <span className="italic">the owner.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-ink-soft">No agent. No commission. Every title searched first.</p>
+          <span className="mt-5 block h-0.5 w-12 bg-ink" aria-hidden="true" />
+          <p className="mt-6 max-w-xl text-[15px] text-ink-soft">
+            No agent. No commission. Every title searched first.
+          </p>
         </div>
         <div className="relative hidden h-52 w-[30rem] overflow-hidden rounded-3xl bg-black lg:block">
           <Photo name="achi-plot" sizes="480px" eager />
