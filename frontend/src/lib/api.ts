@@ -95,7 +95,9 @@ export async function uploadFile(file: File, target: { listingId?: string; dealI
 export async function openFile(id: string) {
   const tab = window.open("", "_blank");
   try {
-    const { url } = await api<{ url: string }>(`/files/${id}/url`);
+    const link = await api<{ url: string }>(`/files/${id}/url`);
+    // Local storage answers with a path on this site; the new tab has no address to resolve it against.
+    const url = new URL(link.url, window.location.origin).href;
     if (tab) tab.location.href = url;
     else window.location.assign(url);
   } catch (err) {

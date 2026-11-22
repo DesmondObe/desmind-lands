@@ -51,7 +51,22 @@ export async function buildApp(
 
   app.decorate("db", db);
   app.decorate("config", config);
-  app.decorate("storage", opts.storage ?? storageFromEnv(config));
+  // The one secret the app keeps for itself: OneDrive's newest refresh token (app_secrets).
+  const secrets = {
+    async get(name: string) {
+      const { rows } = await db.execute<{ value: string; source_hash: string }>(
+        sql`select value, source_hash from app_secrets where name = ${name}`,
+      );
+      return rows[0] ? { value: rows[0].value, sourceHash: rows[0].source_hash } : null;
+    },
+    async set(name: string, value: string, sourceHash: string) {
+      await db.execute(sql`
+        insert into app_secrets (name, value, source_hash) values (${name}, ${value}, ${sourceHash})
+        on conflict (name) do update
+          set value = excluded.value, source_hash = excluded.source_hash, updated_at = now()`);
+    },
+  };
+  app.decorate("storage", opts.storage ?? storageFromEnv(config, secrets));
   app.decorateRequest("userId", null);
 
   await app.register(helmet);

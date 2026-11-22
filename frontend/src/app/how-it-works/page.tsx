@@ -43,7 +43,7 @@ const CHECKS = [
   ["Use a lawyer", "A lawyer of your own choosing can read the papers, and prepare the Deed of Assignment after."],
 ];
 
-const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-7xl";
+const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-6xl";
 
 export default function HowItWorks() {
   return (
@@ -52,8 +52,8 @@ export default function HowItWorks() {
         <PhotoGround name="enugu-homes" eager />
         <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end px-4 pt-40 pb-14 sm:px-6 sm:pb-20">
           <Eyebrow light>How it works · Enugu State</Eyebrow>
-          <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.03em] sm:text-8xl">
-            A seller. A buyer. <span className="text-white/65 italic">And witnesses.</span>
+          <h1 className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
+            A seller. A buyer. <span className="italic">And witnesses.</span>
           </h1>
           <p className="mt-8 text-xl text-white/85">No agent. No commission. Offer to handover.</p>
         </div>
@@ -90,7 +90,7 @@ export default function HowItWorks() {
         <section id="title-search" className="scroll-mt-28 pt-24 sm:pt-32">
           <Eyebrow>Our title search</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Every title. <span className="text-ink-faint italic">Searched first.</span>
+            Every title. <span className="italic">Searched first.</span>
           </h2>
           <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:gap-20">
             <div>
@@ -123,7 +123,7 @@ export default function HowItWorks() {
         <section id="witnesses" className="scroll-mt-28 pt-24 sm:pt-32">
           <Eyebrow>Witnesses</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Every signature, <span className="text-ink-faint italic">witnessed.</span>
+            Every signature, <span className="italic">witnessed.</span>
           </h2>
           <div className="mt-14 grid gap-x-8 gap-y-10 md:grid-cols-3">
             {[
@@ -151,7 +151,7 @@ export default function HowItWorks() {
         <section id="checks" className="scroll-mt-28 pt-24 sm:pt-32">
           <Eyebrow>Before you pay</Eyebrow>
           <h2 className={`mt-5 max-w-4xl ${H2}`}>
-            Six checks. <span className="text-ink-faint italic">Then pay.</span>
+            Six checks. <span className="italic">Then pay.</span>
           </h2>
           <p className="mt-6 max-w-xl text-lg text-ink-soft">
             Our title search is the first check, not the last. The deal room keeps the list.
@@ -168,12 +168,12 @@ export default function HowItWorks() {
         </section>
       </div>
 
-      <section className="relative mt-24 -mb-24 overflow-hidden bg-black text-white sm:mt-32">
+      <section className="relative mx-3 mt-24 overflow-hidden rounded-[2rem] bg-black text-white sm:mx-6 sm:mt-32">
         <PhotoGround name="enugu-road" />
-        <div className="relative mx-auto flex min-h-[78vh] w-full max-w-7xl flex-col justify-end px-4 py-14 sm:px-6 sm:py-20">
+        <div className="relative mx-auto flex min-h-[70vh] w-full max-w-7xl flex-col justify-end px-4 py-14 sm:px-6 sm:py-20">
           <Eyebrow light>Payment</Eyebrow>
-          <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.03em] sm:text-8xl">
-            Money goes <span className="text-white/65 italic">straight to the seller.</span>
+          <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
+            Money goes <span className="italic">straight to the seller.</span>
           </p>
           <p className="mt-6 max-w-2xl text-lg text-white/85">
             We never hold it. Pay only into the account in the signed agreement. If anyone names another account, even

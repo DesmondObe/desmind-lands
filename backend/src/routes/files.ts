@@ -6,7 +6,7 @@ import { asUser } from "../db/client.ts";
 import { files, listings } from "../db/schema.ts";
 import { forbidden, HttpError, notFound } from "../lib/errors.ts";
 import { id, idParams, parse, queryFlag, requireUser } from "../lib/http.ts";
-import { disposition, type LocalStorage } from "../lib/storage.ts";
+import { disposition, type ProxiedStorage } from "../lib/storage.ts";
 
 const MB = 1024 * 1024;
 const IMAGES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
@@ -173,10 +173,10 @@ export async function fileRoutes(app: FastifyInstance) {
     return { ok: true };
   });
 
-  // --- Local disk storage (development) -----------------------------------------------------
+  // --- Files that pass through the API: local disk (development) and OneDrive ----------------
 
-  if (storage.driver === "local") {
-    const local = storage as LocalStorage;
+  if (storage.driver !== "s3") {
+    const local = storage as ProxiedStorage;
     await app.register(async (scope) => {
       scope.addContentTypeParser("*", { parseAs: "buffer", bodyLimit: 26 * MB }, (_req, body, done) =>
         done(null, body),

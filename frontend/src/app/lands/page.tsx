@@ -92,13 +92,13 @@ function Market() {
       <div className="grid animate-rise items-end gap-8 lg:grid-cols-[1fr_auto]">
         <div>
           <Eyebrow>Land for sale in Enugu State</Eyebrow>
-          <h1 className="mt-5 font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-7xl">
-            Buy from <span className="text-ink-faint italic">the owner.</span>
+          <h1 className="mt-5 font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-6xl">
+            Buy from <span className="italic">the owner.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-ink-soft">No agent. No commission. Every title searched first.</p>
         </div>
-        <div className="relative hidden h-52 w-[30rem] overflow-hidden bg-black lg:block">
-          <Photo name="nsukka-wide" sizes="480px" eager />
+        <div className="relative hidden h-52 w-[30rem] overflow-hidden rounded-3xl bg-black lg:block">
+          <Photo name="achi-plot" sizes="480px" eager />
         </div>
       </div>
 

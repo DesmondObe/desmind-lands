@@ -53,7 +53,9 @@ const env = {
   // Links in emails and the API's own origin: the site's own domain once SITE_URL names it.
   WEB_ORIGIN: process.env.WEB_ORIGIN || process.env.SITE_URL || hostUrl || "http://localhost:3000",
   DATABASE_URL: process.env.DATABASE_URL || apiUrl.toString(),
-  STORAGE_DRIVER: process.env.STORAGE_DRIVER || (process.env.S3_BUCKET ? "s3" : "local"),
+  STORAGE_DRIVER:
+    process.env.STORAGE_DRIVER ||
+    (process.env.S3_BUCKET ? "s3" : process.env.ONEDRIVE_REFRESH_TOKEN ? "onedrive" : "local"),
 };
 
 const { migrate, ensureApiLogin, lockDemoAccounts } = await import(`${backend}/dist/db/migrate.js`);

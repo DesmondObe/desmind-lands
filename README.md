@@ -47,5 +47,7 @@ buyer, staff and witnesses, including what each is refused.
 ## Deploy (Railway)
 
 `railway.json` and `.railway/railway.ts` deploy one service to **lands.desmindlabs.com**. Variables:
-`SYSTEM_DATABASE_URL` (Neon, owner), `API_DB_PASSWORD`, `SITE_URL=https://lands.desmindlabs.com`, the `S3_*` storage
-keys, `RESEND_API_KEY`, `EMAIL_FROM="DesMind Lands <lands@desmindlabs.com>"`, and `SEED_DEMO=0`.
+`SYSTEM_DATABASE_URL` (Neon, owner), `API_DB_PASSWORD`, `SITE_URL=https://lands.desmindlabs.com`, file storage (the `S3_*`
+keys, or OneDrive: `AZURE_CLIENT_ID`, `ONEDRIVE_REFRESH_TOKEN`, `ONEDRIVE_TOKEN_KEY`; without either, uploads sit on the
+container's disk and are lost at the next deploy),
+`RESEND_API_KEY`, `EMAIL_FROM="DesMind Lands <lands@desmindlabs.com>"`, and `SEED_DEMO=0`.

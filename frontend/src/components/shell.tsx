@@ -29,12 +29,12 @@ export function Loading({ label = "Loading" }: { label?: string }) {
 export function AuthShell({ children, title, subtitle }: { children: ReactNode; title: string; subtitle?: ReactNode }) {
   return (
     <div className="mx-auto grid min-h-dvh max-w-7xl items-stretch gap-10 px-4 pt-28 pb-10 sm:px-6 lg:grid-cols-[1fr_1fr] lg:gap-16">
-      <div className="relative hidden flex-col justify-end overflow-hidden bg-black p-10 text-white lg:flex">
+      <div className="relative hidden flex-col justify-end overflow-hidden rounded-3xl bg-black p-10 text-white lg:flex">
         <PhotoGround name="nsukka-homes" />
         <div className="relative">
           <Eyebrow light>DesMind Lands · Enugu State</Eyebrow>
-          <p className="mt-6 font-display text-6xl leading-[0.98] tracking-[-0.025em]">
-            Owner to buyer. <span className="text-white/65 italic">Every title searched first.</span>
+          <p className="mt-6 font-display text-5xl leading-[1] tracking-[-0.025em]">
+            Owner to buyer. <span className="italic">Every title searched first.</span>
           </p>
           <ul className="mt-10 grid grid-cols-3 gap-6 border-t border-white/25 pt-5 text-sm text-white/80">
             <li>No agent</li>

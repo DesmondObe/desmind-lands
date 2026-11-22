@@ -17,12 +17,12 @@ import { formatKobo, HOME_LGAS } from "@/lib/land";
  */
 
 const AREAS: [PhotoName, string][] = [
-  ["nsukka-slope", "Nsukka"],
+  ["enugu-layout", "Independence Layout"],
   ["iva-valley", "Enugu"],
-  ["ngwo-pines", "Ngwo"],
-  ["nike-lake", "Nike"],
-  ["achi-above", "Oji River"],
-  ["igboeze-hills", "Igbo-Eze"],
+  ["nsukka-homes", "Nsukka"],
+  ["achi-plot", "Achi"],
+  ["enugu-road", "Oji River"],
+  ["ngwo-hill", "Ngwo"],
 ];
 
 const STEPS: [string, string][] = [
@@ -41,7 +41,7 @@ const PROMISES: [string, string][] = [
 ];
 
 const WRAP = "mx-auto w-full max-w-7xl px-4 sm:px-6";
-const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-7xl";
+const H2 = "font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-6xl";
 
 export default function Home() {
   const router = useRouter();
@@ -76,10 +76,10 @@ export default function Home() {
         <div className={`${WRAP} relative flex flex-1 flex-col justify-end pt-40 pb-12`}>
           <div className="animate-rise">
             <Eyebrow light>Enugu State</Eyebrow>
-            <h1 className="mt-6 font-display text-[3.6rem] leading-[0.92] tracking-[-0.03em] sm:text-8xl lg:text-[8.5rem]">
+            <h1 className="mt-6 font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl lg:text-8xl">
               Sell your land.
               <br />
-              <span className="text-white/65 italic">Keep every naira.</span>
+              <span className="italic">Keep every naira.</span>
             </h1>
             <p className="mt-8 max-w-md text-xl leading-snug text-white/85">
               No agents. No commission. Every title searched first.
@@ -151,13 +151,13 @@ export default function Home() {
             </ButtonLink>
           }
         >
-          This is <span className="text-ink-faint italic">Enugu.</span>
+          This is <span className="italic">Enugu.</span>
         </SectionHead>
 
         <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-3">
           {AREAS.map(([name, area]) => (
             <Link key={name} href={`/lands?q=${encodeURIComponent(area)}`} className="group block">
-              <div className="relative aspect-[4/5] overflow-hidden bg-black">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-black">
                 <Photo
                   name={name}
                   sizes="(min-width: 1024px) 33vw, 50vw"
@@ -170,12 +170,6 @@ export default function Home() {
             </Link>
           ))}
         </div>
-        <p className="mt-8 text-xs text-ink-faint">
-          Enugu State, for illustration. Every listing shows its own photos.{" "}
-          <Link href="/credits" className="underline underline-offset-2 hover:text-ink">
-            Photo credits
-          </Link>
-        </p>
       </section>
 
       {/* ---------------------------------------------------------------- Title search */}
@@ -190,14 +184,14 @@ export default function Home() {
           </ButtonLink>
         }
       >
-        Every title. <span className="text-white/65 italic">Searched first.</span>
+        Every title. <span className="italic">Searched first.</span>
       </PhotoBand>
 
       {/* ---------------------------------------------------------------- The plot */}
       <PlotSheet />
 
       {/* ---------------------------------------------------------------- How */}
-      <section className={`${WRAP} pt-24 sm:pt-32`}>
+      <section className={`${WRAP} pt-16 sm:pt-24`}>
         <SectionHead
           eyebrow="How a sale works"
           action={
@@ -206,13 +200,13 @@ export default function Home() {
             </ButtonLink>
           }
         >
-          Five steps. <span className="text-ink-faint italic">No middleman.</span>
+          Five steps. <span className="italic">No middleman.</span>
         </SectionHead>
         <Columns items={STEPS} className="lg:grid-cols-5" numbered />
       </section>
 
       {/* ---------------------------------------------------------------- Listings */}
-      <section className={`${WRAP} pt-24 sm:pt-32`}>
+      <section className={`${WRAP} pt-16 sm:pt-24`}>
         <SectionHead
           eyebrow="On the market"
           action={
@@ -250,22 +244,22 @@ export default function Home() {
 
       {/* ---------------------------------------------------------------- What an agent costs */}
       <PhotoBand name="nsukka-sky" eyebrow="What an agent costs">
-        Agents take 10%. <span className="text-white/65 italic">We take nothing.</span>
+        Agents take 10%. <span className="italic">We take nothing.</span>
       </PhotoBand>
 
       {/* ---------------------------------------------------------------- Work it out */}
       <Calculator />
 
       {/* ---------------------------------------------------------------- Witnesses */}
-      <section className={`${WRAP} pt-24 sm:pt-32`}>
+      <section className={`${WRAP} pt-16 sm:pt-24`}>
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <div className="relative aspect-[4/5] overflow-hidden bg-black">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-black">
             <Photo name="nsukka-homes" sizes="(min-width: 1024px) 50vw, 100vw" />
           </div>
           <div>
             <Eyebrow>Who a sale needs</Eyebrow>
             <h2 className={`mt-5 ${H2}`}>
-              Seller. Buyer. <span className="text-ink-faint italic">Witness.</span>
+              Seller. Buyer. <span className="italic">Witness.</span>
             </h2>
             <p className="mt-6 max-w-md text-xl leading-snug text-ink-soft">
               Each side brings someone they trust. Nobody else is needed.
@@ -286,7 +280,7 @@ export default function Home() {
       </section>
 
       {/* ---------------------------------------------------------------- Safety */}
-      <section className={`${WRAP} pt-24 sm:pt-32`}>
+      <section className={`${WRAP} pt-16 sm:pt-24`}>
         <SectionHead eyebrow="Why it is safe">Nothing hidden.</SectionHead>
         <Columns items={PROMISES} className="lg:grid-cols-4" />
       </section>
@@ -296,7 +290,6 @@ export default function Home() {
         name="nsukka-grass"
         eyebrow="Ten minutes to list"
         note="Free. And you keep the whole price."
-        className="-mb-24"
         action={
           <>
             <ButtonLink href="/sell" variant="light" size="lg">
@@ -308,7 +301,7 @@ export default function Home() {
           </>
         }
       >
-        Your land. Your buyer. <span className="text-white/65 italic">Your money.</span>
+        Your land. Your buyer. <span className="italic">Your money.</span>
       </PhotoBand>
     </>
   );
@@ -323,15 +316,15 @@ function PlotSheet() {
     ["Title search", "Passed, 4 Nov 2026"],
   ];
   return (
-    <section className={`${WRAP} pt-24 sm:pt-32`}>
+    <section className={`${WRAP} pt-16 sm:pt-24`}>
       <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_1fr] lg:gap-20">
-        <div className="aspect-[4/3] border border-ink">
+        <div className="aspect-[4/3] overflow-hidden rounded-3xl border border-ink">
           <PlotArt seed="hero-emene-two-plots" paper animate label="Survey plan of a parcel of land" />
         </div>
         <div>
           <Eyebrow>Every listing</Eyebrow>
           <h2 className={`mt-5 ${H2}`}>
-            Drawn. Measured. <span className="text-ink-faint italic">Searched.</span>
+            Drawn. Measured. <span className="italic">Searched.</span>
           </h2>
           <dl className="mt-10 border-b border-line">
             {facts.map(([k, v]) => (
@@ -359,12 +352,12 @@ function Calculator() {
   const kobo = millions * 1e6 * 100;
   const each = kobo * 0.1;
   return (
-    <section className={`${WRAP} pt-24 sm:pt-32`}>
+    <section className={`${WRAP} pt-16 sm:pt-24`}>
       <div className="grid gap-14 lg:grid-cols-2 lg:gap-20">
         <div>
           <Eyebrow>Work it out</Eyebrow>
           <p className="mt-10 text-sm text-ink-soft">Your price</p>
-          <p className="mt-1 font-display text-6xl leading-none tracking-[-0.03em] text-ink tabular sm:text-7xl">
+          <p className="mt-1 font-display text-6xl leading-none tracking-[-0.03em] text-ink tabular sm:text-6xl">
             {formatKobo(kobo)}
           </p>
           <input
@@ -412,7 +405,7 @@ function Calculator() {
           ))}
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-t border-ink pt-6">
             <dt className="text-lg text-ink">Stays with you both</dt>
-            <dd className="font-display text-5xl leading-none tracking-[-0.03em] text-ink tabular sm:text-7xl">
+            <dd className="font-display text-5xl leading-none tracking-[-0.03em] text-ink tabular sm:text-6xl">
               {formatKobo(each * 2)}
             </dd>
           </div>
@@ -446,12 +439,14 @@ function Columns({
   numbered?: boolean;
 }) {
   return (
-    <ol className={`mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 ${className ?? ""}`}>
+    <ol className={`mt-10 grid gap-x-6 gap-y-8 sm:grid-cols-2 ${className ?? ""}`}>
       {items.map(([title, body], i) => (
-        <li key={title} className="border-t border-ink pt-5">
-          {numbered && <p className="font-mono text-xs text-ink-faint">{String(i + 1).padStart(2, "0")}</p>}
-          <h3 className={`font-display text-2xl text-ink ${numbered ? "mt-8" : ""}`}>{title}</h3>
-          <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{body}</p>
+        <li key={title} className="border-t-2 border-ink pt-4">
+          <h3 className="flex items-baseline gap-3 font-display text-3xl text-ink">
+            {numbered && <span className="text-xl tabular">{i + 1}</span>}
+            {title}
+          </h3>
+          <p className="mt-1.5 text-[15px] leading-snug text-ink">{body}</p>
         </li>
       ))}
     </ol>
@@ -479,12 +474,14 @@ function PhotoBand({
   return (
     <section
       id={id}
-      className={`relative mt-24 scroll-mt-16 overflow-hidden bg-black text-white sm:mt-32 ${className ?? ""}`}
+      className={`relative mx-3 mt-16 scroll-mt-20 overflow-hidden rounded-[2rem] bg-black text-white sm:mx-6 sm:mt-24 ${className ?? ""}`}
     >
       <PhotoGround name={name} />
-      <div className={`${WRAP} relative flex min-h-[78vh] flex-col justify-end py-14 sm:py-20`}>
+      <div className={`${WRAP} relative flex min-h-[70vh] flex-col justify-end py-12 sm:py-16`}>
         <Eyebrow light>{eyebrow}</Eyebrow>
-        <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.03em] sm:text-8xl">{children}</p>
+        <p className="mt-6 max-w-5xl font-display text-5xl leading-[0.95] tracking-[-0.025em] sm:text-7xl">
+          {children}
+        </p>
         {note && <p className="mt-6 text-xl text-white/85">{note}</p>}
         {action && <div className="mt-8 flex flex-wrap gap-3">{action}</div>}
       </div>

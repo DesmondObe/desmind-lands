@@ -21,7 +21,7 @@ export default function Credits() {
           const p = PHOTOS[name];
           return (
             <li key={name}>
-              <div className="relative aspect-[3/2] overflow-hidden bg-black">
+              <div className="relative aspect-[3/2] overflow-hidden rounded-3xl bg-black">
                 <Photo name={name} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
               </div>
               <div className="mt-4 border-t border-ink pt-4 text-sm">

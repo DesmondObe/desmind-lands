@@ -8,7 +8,14 @@ const schema = z.object({
   SESSION_DAYS: z.coerce.number().int().positive().default(30),
   DB_POOL_MAX: z.coerce.number().int().positive().default(10),
   // File storage: any S3-compatible service. Unset: a folder on disk, outside production.
-  STORAGE_DRIVER: z.enum(["s3", "local"]).optional(),
+  STORAGE_DRIVER: z.enum(["s3", "local", "onedrive"]).optional(),
+  // Or a folder of a OneDrive, signed in to with a refresh token (lib/storage.ts).
+  AZURE_CLIENT_ID: z.string().optional(),
+  AZURE_CLIENT_SECRET: z.string().optional(),
+  AZURE_TENANT_ID: z.string().optional(),
+  ONEDRIVE_REFRESH_TOKEN: z.string().optional(),
+  ONEDRIVE_TOKEN_KEY: z.string().optional(),
+  ONEDRIVE_FOLDER: z.string().optional(),
   STORAGE_DIR: z.string().optional(),
   S3_ENDPOINT: z.string().url().optional(),
   S3_REGION: z.string().optional(),

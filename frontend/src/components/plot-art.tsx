@@ -162,6 +162,12 @@ export function PlotArt({
           </g>
         );
       })}
+      {/* A ball travelling the boundary, as a surveyor walks it. */}
+      {animate && (
+        <circle r={paper ? 5 : 6} fill={ink} stroke={ground} strokeWidth="2">
+          <animateMotion dur="12s" repeatCount="indefinite" path={boundary} />
+        </circle>
+      )}
       {/* North arrow */}
       <g transform={`translate(${W - 34} 34)`} opacity="0.85">
         <circle r="15" fill="none" stroke={ink} strokeOpacity="0.35" />

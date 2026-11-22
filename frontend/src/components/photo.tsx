@@ -123,6 +123,22 @@ export const PHOTOS = {
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
     source: "https://commons.wikimedia.org/wiki/File:Enugu_ngwo_hill_2.jpg",
   },
+  "achi-plot": {
+    alt: "A walled plot beside a tarred road lined with palm trees",
+    place: "Achi, Oji River, Enugu State",
+    author: "Ifeanyichukwu",
+    licence: "CC BY 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by/4.0",
+    source: "https://commons.wikimedia.org/wiki/File:Achi_street_view_2.jpg",
+  },
+  "enugu-layout": {
+    alt: "A road junction in Independence Layout, Enugu, with offices and traffic",
+    place: "Independence Layout, Enugu",
+    author: "Bibiire1",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    source: "https://commons.wikimedia.org/wiki/File:Independent_layout_road_Enugu.jpg",
+  },
   "iva-valley": {
     alt: "Morning mist lying in a valley of trees and rooftops, under a wooded ridge",
     place: "Iva Valley, Enugu",
