@@ -224,7 +224,7 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
                 <span
                   className={cx(
                     "grid size-7 place-items-center rounded-full",
-                    done ? "bg-forest-600 text-white" : "border-2 border-dashed border-line-strong",
+                    done ? "bg-primary text-on-primary" : "border-2 border-dashed border-line-strong",
                   )}
                 >
                   {done && <Icon d={icons.check} className="size-4" />}
@@ -248,7 +248,7 @@ export default function ManageListing({ params }: { params: Promise<{ id: string
                 {/* biome-ignore lint/performance/noImgElement: signed storage URL. */}
                 <img src={p.url} alt="" className="size-full object-cover" />
                 {i === 0 && (
-                  <span className="absolute top-2 left-2 rounded-full bg-earth-500 px-2 py-0.5 text-[10px] font-bold text-white uppercase">
+                  <span className="absolute top-2 left-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-black uppercase">
                     Cover
                   </span>
                 )}

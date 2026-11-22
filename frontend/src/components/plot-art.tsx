@@ -16,11 +16,11 @@ function seeded(seed: string) {
 const round = (v: number) => Math.round(v * 10) / 10;
 
 const GROUNDS: Record<string, [string, string]> = {
-  residential: ["oklch(0.3 0.055 160)", "oklch(0.22 0.04 163)"],
-  commercial: ["oklch(0.33 0.05 200)", "oklch(0.22 0.035 200)"],
-  agricultural: ["oklch(0.36 0.07 135)", "oklch(0.24 0.05 140)"],
-  industrial: ["oklch(0.32 0.03 60)", "oklch(0.22 0.025 60)"],
-  mixed: ["oklch(0.34 0.07 40)", "oklch(0.23 0.05 38)"],
+  residential: ["oklch(0.3 0 0)", "oklch(0.13 0 0)"],
+  commercial: ["oklch(0.36 0 0)", "oklch(0.17 0 0)"],
+  agricultural: ["oklch(0.26 0 0)", "oklch(0.1 0 0)"],
+  industrial: ["oklch(0.4 0 0)", "oklch(0.2 0 0)"],
+  mixed: ["oklch(0.33 0 0)", "oklch(0.15 0 0)"],
 };
 
 /**
@@ -28,6 +28,9 @@ const GROUNDS: Record<string, [string, string]> = {
  * boundary with its beacons and their numbers, the length of each side, and a north arrow.
  * Not the real shape of the land: a picture in the language of a plan, for a listing
  * without photos and for the site's own illustrations.
+ *
+ * `paper` draws it as a surveyor would: ink on the page's own ground, for use on white (and,
+ * turned over, on the dark theme). Without it the plan is white on black, to sit under text.
  */
 export function PlotArt({
   seed,
@@ -35,18 +38,24 @@ export function PlotArt({
   className,
   animate,
   label,
+  paper,
 }: {
   seed: string;
   landUse?: string;
   className?: string;
   animate?: boolean;
   label?: string;
+  paper?: boolean;
 }) {
   const r = seeded(seed);
   const W = 400;
   const H = 300;
   const [g1, g2] = GROUNDS[landUse] ?? GROUNDS.residential!;
-  const uid = `p${seed.replace(/[^a-z0-9]/gi, "").slice(0, 10)}`;
+  const uid = `p${seed.replace(/[^a-z0-9]/gi, "").slice(0, 10)}${paper ? "p" : ""}`;
+  const ink = paper ? "var(--color-ink)" : "#FFFFFF";
+  const ground = paper ? "var(--color-canvas)" : "#0A0A0A";
+  // Lines read fainter on black than on white, so paper gets a little less of each.
+  const k = paper ? 0.75 : 1;
 
   // Contours: gentle waves across the ground, each a little higher than the last.
   const contours = Array.from({ length: 9 }, (_, i) => {
@@ -87,21 +96,21 @@ export function PlotArt({
           <stop offset="1" stopColor={g2} />
         </linearGradient>
         <pattern id={`${uid}-grid`} width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0V20" fill="none" stroke="white" strokeOpacity="0.05" />
+          <path d="M20 0H0V20" fill="none" stroke={ink} strokeOpacity={0.06 * k} />
         </pattern>
         <pattern id={`${uid}-hatch`} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <path d="M0 0V8" stroke="#D2AE62" strokeOpacity="0.18" strokeWidth="2" />
+          <path d="M0 0V8" stroke={ink} strokeOpacity={0.12 * k} strokeWidth="2" />
         </pattern>
       </defs>
-      <rect width={W} height={H} fill={`url(#${uid}-g)`} />
+      <rect width={W} height={H} fill={paper ? ground : `url(#${uid}-g)`} />
       <rect width={W} height={H} fill={`url(#${uid}-grid)`} />
       {contours.map((d, i) => (
         <path
           key={d}
           d={d}
           fill="none"
-          stroke="white"
-          strokeOpacity={i % 3 === 0 ? 0.16 : 0.08}
+          stroke={ink}
+          strokeOpacity={(i % 3 === 0 ? 0.16 : 0.08) * k}
           strokeWidth={i % 3 === 0 ? 1.1 : 0.8}
         />
       ))}
@@ -109,8 +118,8 @@ export function PlotArt({
       <path
         d={boundary}
         fill="none"
-        stroke="#D2AE62"
-        strokeWidth="2"
+        stroke={ink}
+        strokeWidth={paper ? 1.6 : 2}
         strokeLinejoin="round"
         pathLength={animate ? 1 : undefined}
         strokeDasharray={animate ? 1 : undefined}
@@ -132,19 +141,20 @@ export function PlotArt({
               textAnchor="middle"
               fontSize="10"
               fontFamily="ui-monospace, monospace"
-              fill="white"
+              fill={ink}
               fillOpacity="0.7"
             >
               {len.toFixed(1)}m
             </text>
-            <circle cx={x} cy={y} r="5.5" fill={i === 0 ? "#C8643B" : "#F6F1E4"} stroke="#173A2F" strokeWidth="1.5" />
+            <circle cx={x} cy={y} r={paper ? 4.5 : 5.5} fill={i === 0 ? ink : ground} stroke={ink} strokeWidth="1.5" />
             <text
               x={round(x + (x > cx0 ? 10 : -10))}
               y={round(y + (y > cy0 ? 16 : -9))}
               textAnchor={x > cx0 ? "start" : "end"}
               fontSize="9"
               fontFamily="ui-monospace, monospace"
-              fill="#D2AE62"
+              fill={ink}
+              fillOpacity="0.75"
               letterSpacing="0.5"
             >
               SC/{beaconBase + i * 3}
@@ -154,9 +164,9 @@ export function PlotArt({
       })}
       {/* North arrow */}
       <g transform={`translate(${W - 34} 34)`} opacity="0.85">
-        <circle r="15" fill="none" stroke="white" strokeOpacity="0.35" />
-        <path d="M0 -11 L4.5 5 L0 2 L-4.5 5 Z" fill="#D2AE62" />
-        <text y="-18" textAnchor="middle" fontSize="9" fontWeight="700" fill="white" fillOpacity="0.8">
+        <circle r="15" fill="none" stroke={ink} strokeOpacity="0.35" />
+        <path d="M0 -11 L4.5 5 L0 2 L-4.5 5 Z" fill={ink} />
+        <text y="-18" textAnchor="middle" fontSize="9" fontWeight="700" fill={ink} fillOpacity="0.8">
           N
         </text>
       </g>

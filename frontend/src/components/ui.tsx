@@ -19,13 +19,11 @@ const buttonBase =
 const buttonVariant: Record<Variant, string> = {
   primary:
     "bg-primary text-on-primary shadow-soft ring-1 ring-inset ring-white/10 hover:bg-primary-hover hover:shadow-card",
-  earth:
-    "bg-earth-500 text-white shadow-soft hover:bg-earth-600 hover:shadow-lift dark:bg-earth-400 dark:text-forest-950",
-  secondary:
-    "border border-line-strong bg-surface text-ink shadow-soft hover:border-forest-600 hover:text-forest-800 dark:hover:border-forest-300",
+  earth: "bg-black text-white shadow-soft ring-1 ring-inset ring-white/15 hover:bg-neutral-800 hover:shadow-lift",
+  secondary: "border border-line-strong bg-surface text-ink shadow-soft hover:border-ink hover:bg-sunken",
   danger: "bg-danger text-white shadow-soft hover:brightness-110",
   ghost: "text-ink-soft hover:bg-sunken hover:text-ink",
-  light: "bg-white text-forest-950 shadow-soft hover:bg-brass-100",
+  light: "bg-white text-black shadow-soft hover:bg-neutral-200",
 };
 
 const buttonSize: Record<Size, string> = {
@@ -75,7 +73,7 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 const fieldClass =
-  "w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-[15px] text-ink shadow-[0_1px_1px_oklch(0.2_0.03_160/0.04)] outline-none transition placeholder:text-ink-faint hover:border-ink-faint/60 focus:border-forest-600 focus:ring-4 focus:ring-forest-600/12 disabled:bg-sunken disabled:text-ink-soft";
+  "w-full rounded-xl border border-line-strong bg-surface px-3.5 py-2.5 text-[15px] text-ink shadow-[0_1px_1px_oklch(0_0_0/0.04)] outline-none transition placeholder:text-ink-faint hover:border-ink-faint/60 focus:border-ink focus:ring-4 focus:ring-ink/10 disabled:bg-sunken disabled:text-ink-soft";
 
 export const Input = (props: InputHTMLAttributes<HTMLInputElement>) => (
   <input {...props} className={cx(fieldClass, props.className)} />
@@ -104,12 +102,13 @@ export function Card({ children, className }: { children: ReactNode; className?:
 
 type Tone = "good" | "wait" | "bad" | "quiet" | "info" | "earth";
 const toneClass: Record<Tone, [string, string]> = {
-  good: ["bg-forest-100 text-forest-800", "bg-forest-500"],
-  wait: ["bg-amber-100 text-amber-800", "bg-amber-500"],
+  // Told apart by weight, not hue: solid ink, an ink outline, a soft outline, grey. Red is for trouble.
+  good: ["bg-ink text-canvas", "bg-canvas"],
+  wait: ["bg-sunken text-ink ring-1 ring-inset ring-line-strong", "bg-ink"],
   bad: ["bg-red-100 text-red-800", "bg-red-500"],
-  quiet: ["bg-stone-100 text-stone-700", "bg-stone-400"],
-  info: ["bg-sky-100 text-sky-800", "bg-sky-500"],
-  earth: ["bg-earth-100 text-earth-800", "bg-earth-500"],
+  quiet: ["bg-sunken text-ink-faint", "bg-ink-faint"],
+  info: ["bg-surface text-ink ring-1 ring-inset ring-ink", "bg-ink"],
+  earth: ["bg-surface text-ink ring-1 ring-inset ring-line-strong", "bg-ink-soft"],
 };
 
 export function Badge({ tone = "quiet", live, children }: { tone?: Tone; live?: boolean; children: ReactNode }) {
@@ -161,17 +160,17 @@ export function ErrorText({ error }: { error: string | null }) {
   );
 }
 
-/** A small uppercase label above a heading, opened by a short laterite rule. */
+/** A small uppercase label above a heading, opened by a short rule. */
 export function Eyebrow({ children, className, light }: { children: ReactNode; className?: string; light?: boolean }) {
   return (
     <p
       className={cx(
         "flex items-center gap-3 text-[11px] font-bold tracking-[0.24em] uppercase",
-        light ? "text-brass-300" : "text-earth-600 dark:text-accent",
+        light ? "text-white/80" : "text-ink-soft",
         className,
       )}
     >
-      <span className={cx("h-px w-8", light ? "bg-brass-300" : "bg-accent")} aria-hidden="true" />
+      <span className={cx("h-px w-8", light ? "bg-white/70" : "bg-ink")} aria-hidden="true" />
       {children}
     </p>
   );
@@ -203,7 +202,7 @@ export function PageTitle({
 export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
     <div className="survey-grid flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line-strong bg-surface/60 px-6 py-16 text-center">
-      <svg viewBox="0 0 48 48" fill="none" className="size-12 text-earth-500" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none" className="size-12 text-ink" aria-hidden="true">
         <path d="M8 34 14 12l22 4 4 20-32-2Z" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 3" />
         {[
           [8, 34],
@@ -222,29 +221,28 @@ export function Empty({ title, children, action }: { title: string; children?: R
 }
 
 /**
- * The DesMind Lands mark: a parcel of land drawn as on a survey plan, in brass, with its
- * corner beacons, one of them laterite red, on a forest-green tile.
+ * The DesMind Lands mark: a parcel of land drawn as on a survey plan, with its corner beacons,
+ * the first of them larger, on an ink tile. `inverted` is the outline version for black grounds.
  */
 export function LogoMark({ className, inverted }: { className?: string; inverted?: boolean }) {
   return (
     <svg viewBox="0 0 32 32" className={cx("size-9 shrink-0", className)} aria-hidden="true">
       {inverted ? (
-        <rect x="0.6" y="0.6" width="30.8" height="30.8" rx="9" fill="none" stroke="#D2AE62" strokeWidth="1.2" />
+        <rect x="0.6" y="0.6" width="30.8" height="30.8" rx="9" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
       ) : (
-        <rect width="32" height="32" rx="9" fill="#173A2F" />
+        <rect width="32" height="32" rx="9" fill="var(--color-ink)" />
       )}
-      <path d="M8.5 21.5 10.5 9.5l13 2.2 1 11.8-16-2Z" fill="#D2AE62" fillOpacity="0.16" />
-      <path
-        d="M8.5 21.5 10.5 9.5l13 2.2 1 11.8-16-2Z"
-        fill="none"
-        stroke="#D2AE62"
-        strokeWidth="1.4"
+      <g
+        fill={inverted ? "#FFFFFF" : "var(--color-canvas)"}
+        stroke={inverted ? "#FFFFFF" : "var(--color-canvas)"}
         strokeLinejoin="round"
-      />
-      <circle cx="10.5" cy="9.5" r="1.9" fill="#FFFFFF" />
-      <circle cx="23.5" cy="11.7" r="1.9" fill="#FFFFFF" />
-      <circle cx="24.5" cy="23.5" r="1.9" fill="#FFFFFF" />
-      <circle cx="8.5" cy="21.5" r="2.3" fill="#C8643B" />
+      >
+        <path d="M8.5 21.5 10.5 9.5l13 2.2 1 11.8-16-2Z" fillOpacity="0.14" strokeWidth="1.3" />
+        <circle cx="10.5" cy="9.5" r="1.5" stroke="none" />
+        <circle cx="23.5" cy="11.7" r="1.5" stroke="none" />
+        <circle cx="24.5" cy="23.5" r="1.5" stroke="none" />
+        <circle cx="8.5" cy="21.5" r="2.5" stroke="none" />
+      </g>
     </svg>
   );
 }
@@ -265,7 +263,7 @@ export function Logo({ className, inverted }: { className?: string; inverted?: b
         <span
           className={cx(
             "mt-1 pl-px text-[8.5px] font-extrabold tracking-[0.55em]",
-            inverted ? "text-brass-300" : "text-earth-600 dark:text-accent",
+            inverted ? "text-white/70" : "text-ink-soft",
           )}
         >
           LANDS
@@ -296,7 +294,9 @@ export function TitleSearchSeal({
       <span
         className={cx(
           "inline-flex items-center gap-1.5 rounded-full py-1 pr-2.5 pl-1.5 text-[11px] font-bold whitespace-nowrap",
-          light ? "bg-white/92 text-forest-900 shadow-soft backdrop-blur" : "bg-forest-100 text-forest-800",
+          light
+            ? "bg-white/95 text-black shadow-soft backdrop-blur [--tick:white]"
+            : "bg-ink text-canvas [--tick:var(--color-ink)]",
           className,
         )}
       >
@@ -309,7 +309,9 @@ export function TitleSearchSeal({
       <span
         className={cx(
           "grid size-9 shrink-0 place-items-center rounded-xl",
-          light ? "bg-white/10 text-brass-300 ring-1 ring-white/15" : "bg-forest-100 text-forest-700",
+          light
+            ? "bg-white/10 text-white ring-1 ring-white/20 [--tick:black]"
+            : "bg-ink text-canvas [--tick:var(--color-ink)]",
         )}
       >
         <ShieldTick className="size-5" />
@@ -333,7 +335,7 @@ function ShieldTick({ className }: { className?: string }) {
       <path
         d="m6.8 10.1 2.2 2.2 4.3-4.6"
         fill="none"
-        stroke="white"
+        stroke="var(--tick, white)"
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"

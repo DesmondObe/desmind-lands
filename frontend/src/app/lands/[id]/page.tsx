@@ -465,7 +465,7 @@ export default function LandPage({ params }: { params: Promise<{ id: string }> }
           // `inert` rather than only hidden: off screen, its button must not take focus.
           inert={panelSeen}
           className={cx(
-            "fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_-12px_oklch(0.2_0.03_160/0.25)] backdrop-blur-xl transition duration-300 lg:hidden print:hidden",
+            "fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_-12px_oklch(0_0_0/0.2)] backdrop-blur-xl transition duration-300 lg:hidden print:hidden",
             panelSeen && "translate-y-full opacity-0",
           )}
         >

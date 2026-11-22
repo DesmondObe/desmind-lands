@@ -61,7 +61,7 @@ export function ListingCard({ l, href, className }: { l: Card; href?: string; cl
             <span
               className={cx(
                 "rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase backdrop-blur",
-                sold ? "bg-white/92 text-forest-900" : "bg-earth-500/92 text-white",
+                sold ? "bg-white/92 text-forest-900" : "bg-black/80 text-white",
               )}
             >
               {LISTING_STATUS[l.status] ?? l.status}

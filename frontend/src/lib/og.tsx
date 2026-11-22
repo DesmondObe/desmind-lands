@@ -1,15 +1,15 @@
 import { ImageResponse } from "next/og";
 
 /**
- * The preview card a shared link shows (WhatsApp, X, iMessage): the brand's deep green and
- * brass, a parcel drawn as on a survey plan, and the few facts that matter. Server only.
+ * The preview card a shared link shows (WhatsApp, X, iMessage): the brand's black and
+ * white, a parcel drawn as on a survey plan, and the few facts that matter. Server only.
  * Satori draws it, so: flex layout everywhere, hex colours, no CSS variables.
  */
 export const ogSize = { width: 1200, height: 630 };
 
-const FOREST = "#12281F";
-const BRASS = "#D2AE62";
-const LATERITE = "#C8643B";
+const FOREST = "#0A0A0A";
+const BRASS = "#FFFFFF";
+const LATERITE = "#FFFFFF";
 
 export function ogCard({
   eyebrow,
@@ -34,7 +34,7 @@ export function ogCard({
         justifyContent: "space-between",
         padding: 64,
         color: "white",
-        background: `linear-gradient(135deg, #1D4636 0%, ${FOREST} 55%, #0C1A14 100%)`,
+        background: `linear-gradient(135deg, #2A2A2A 0%, ${FOREST} 55%, #000000 100%)`,
         fontFamily: "sans-serif",
       }}
     >
@@ -74,7 +74,11 @@ export function ogCard({
         </svg>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: 30, fontWeight: 600 }}>DesMind</div>
-          <div style={{ display: "flex", fontSize: 13, letterSpacing: 8, color: BRASS, fontWeight: 700 }}>LANDS</div>
+          <div
+            style={{ display: "flex", fontSize: 13, letterSpacing: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}
+          >
+            LANDS
+          </div>
         </div>
       </div>
 
@@ -144,7 +148,7 @@ export function ogCard({
             }}
           >
             <svg width="30" height="30" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M10 1.8 3.2 4.4v5.2c0 4.1 2.9 7.1 6.8 8.6 3.9-1.5 6.8-4.5 6.8-8.6V4.4L10 1.8Z" fill="#2F6B52" />
+              <path d="M10 1.8 3.2 4.4v5.2c0 4.1 2.9 7.1 6.8 8.6 3.9-1.5 6.8-4.5 6.8-8.6V4.4L10 1.8Z" fill="#0A0A0A" />
               <path
                 d="m6.8 10.1 2.2 2.2 4.3-4.6"
                 fill="none"

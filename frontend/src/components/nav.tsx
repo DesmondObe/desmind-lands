@@ -7,7 +7,7 @@ import { THEME_STORAGE_KEY } from "@/lib/theme";
 import { useSession } from "./session";
 import { ButtonLink, cx, Logo } from "./ui";
 
-/** Pages that open on the deep green hero: the header sits over it, light on dark. */
+/** Pages that open on a black, photographed hero: the header sits over it, light on dark. */
 const DARK_HERO = ["/", "/how-it-works"];
 
 export function ThemeToggle({ light }: { light?: boolean }) {
@@ -87,7 +87,7 @@ export function Nav() {
         "fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300 print:hidden",
         overHero
           ? "border-b border-transparent bg-transparent"
-          : "border-b border-line bg-canvas/85 shadow-soft backdrop-blur-xl",
+          : "border-b border-line bg-canvas/80 backdrop-blur-xl backdrop-saturate-150",
       )}
     >
       <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-6 px-4 sm:px-6">
@@ -110,7 +110,12 @@ export function Nav() {
             >
               {label}
               {href === "/dashboard" && !!me?.openDeals && (
-                <span className="ml-1.5 inline-grid min-w-5 place-items-center rounded-full bg-earth-500 px-1.5 text-[10px] font-bold text-white">
+                <span
+                  className={cx(
+                    "ml-1.5 inline-grid min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold",
+                    overHero ? "bg-white text-black" : "bg-accent text-on-accent",
+                  )}
+                >
                   {me.openDeals}
                 </span>
               )}
@@ -128,7 +133,10 @@ export function Nav() {
               overHero ? "bg-white/8 text-white/80 ring-1 ring-white/15" : "bg-sunken text-ink-soft ring-1 ring-line",
             )}
           >
-            <span className="size-1.5 animate-pulse-dot rounded-full bg-earth-500" aria-hidden="true" />
+            <span
+              className={cx("size-1.5 animate-pulse-dot rounded-full", overHero ? "bg-white" : "bg-accent")}
+              aria-hidden="true"
+            />
             Now in Enugu State
           </Link>
           <ThemeToggle light={overHero} />
@@ -138,7 +146,7 @@ export function Nav() {
                 href="/account"
                 className={cx(
                   "grid size-10 place-items-center rounded-full text-sm font-bold",
-                  overHero ? "bg-white/10 text-white ring-1 ring-white/20" : "bg-forest-100 text-forest-800",
+                  overHero ? "bg-white/10 text-white ring-1 ring-white/20" : "bg-ink text-canvas",
                 )}
                 title={me.user.fullName}
               >

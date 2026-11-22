@@ -256,7 +256,7 @@ export function ListingForm({
                   className={cx(
                     "rounded-full border px-4 py-2 text-sm font-medium transition",
                     on
-                      ? "border-forest-700 bg-forest-900 text-white dark:bg-forest-200 dark:text-forest-950"
+                      ? "border-primary bg-primary text-on-primary"
                       : "border-line-strong text-ink-soft hover:border-ink-faint",
                   )}
                 >

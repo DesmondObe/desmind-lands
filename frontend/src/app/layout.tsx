@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
 };
 
-export const viewport: Viewport = { themeColor: "#173A2F" };
+export const viewport: Viewport = { themeColor: "#0A0A0A" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -82,21 +82,22 @@ function Footer() {
         ["/how-it-works#witnesses", "Witnesses"],
         ["/terms", "Terms of use"],
         ["/privacy", "Privacy"],
+        ["/credits", "Photo credits"],
       ],
     ],
   ];
   return (
-    <footer className="deep-ground relative mt-24 overflow-hidden text-white/70 print:hidden">
+    <footer className="deep-ground relative mt-24 overflow-hidden border-t border-white/10 text-white/70 print:hidden">
       <div className="survey-grid absolute inset-0 [--grid-line:oklch(1_0_0/0.035)]" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-4 pt-20 pb-10 sm:px-6">
         <div className="grid gap-12 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
           <div className="space-y-6">
             <Logo inverted />
             <p className="max-w-sm font-display text-2xl leading-snug text-white">
-              Land, sold directly. <span className="text-brass-300">No agents. No 10% cut.</span>
+              Land, sold directly. <span className="text-white/55 italic">No agents. No 10% cut.</span>
             </p>
             <p className="inline-flex items-center gap-2 rounded-full bg-white/6 px-3 py-1.5 text-xs font-semibold text-white/75 ring-1 ring-white/10">
-              <span className="size-1.5 rounded-full bg-earth-400" aria-hidden="true" />
+              <span className="size-1.5 rounded-full bg-white" aria-hidden="true" />
               Now serving all 17 LGAs of Enugu State. More of Nigeria soon.
             </p>
             <div className="space-y-1.5 text-sm">
@@ -109,7 +110,7 @@ function Footer() {
           </div>
           {columns.map(([title, links]) => (
             <div key={title}>
-              <h2 className="mb-5 text-[11px] font-bold tracking-[0.22em] text-brass-300 uppercase">{title}</h2>
+              <h2 className="mb-5 text-[11px] font-bold tracking-[0.22em] text-white/55 uppercase">{title}</h2>
               <ul className="space-y-3 text-sm">
                 {links.map(([href, label]) => (
                   <li key={label}>

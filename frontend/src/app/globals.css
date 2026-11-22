@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
 /*
- * DesMind Lands. The palette is the land itself: deep forest green (the brand), laterite, the
- * red earth of southern Nigeria (the warm accent), and brass for the fine lines of a survey
- * plan. Pages reach for the semantic tokens (canvas, surface, ink, line, primary, accent);
- * the dark theme redefines them, and remaps the scales pages use directly.
+ * DesMind Lands. Pure black on pure white: the only colour on the site is in the photographs
+ * of the land itself. Pages reach for the semantic tokens (canvas, surface, ink,
+ * line, primary, accent); the dark theme turns them over, white on black.
+ *
+ * The scales keep their first names, and are now all neutral. `forest` runs from paper (50) to
+ * ink (950). `earth` is the accent: 50 to 300 are pale tints, 500 is the accent itself (ink on
+ * the light theme, white on the dark) and takes `on-accent` text, 600 and darker are for
+ * labels. `brass` is the silver for fine lines and labels on black grounds. Red is kept for
+ * errors and danger, where colour carries meaning.
  *
  * The theme lives on <html data-theme>, set before first paint by app/layout.tsx.
  */
@@ -16,38 +21,52 @@
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* Forest: the brand. */
-  --color-forest-50: oklch(0.975 0.014 155);
-  --color-forest-100: oklch(0.94 0.035 155);
-  --color-forest-200: oklch(0.88 0.06 155);
-  --color-forest-300: oklch(0.79 0.085 155);
-  --color-forest-400: oklch(0.67 0.1 155);
-  --color-forest-500: oklch(0.56 0.1 156);
-  --color-forest-600: oklch(0.47 0.09 157);
-  --color-forest-700: oklch(0.39 0.075 158);
-  --color-forest-800: oklch(0.32 0.06 160);
-  --color-forest-900: oklch(0.26 0.048 162);
-  --color-forest-950: oklch(0.19 0.035 165);
+  /* Paper to ink. */
+  --color-forest-50: oklch(0.975 0 0);
+  --color-forest-100: oklch(0.95 0 0);
+  --color-forest-200: oklch(0.905 0 0);
+  --color-forest-300: oklch(0.84 0 0);
+  --color-forest-400: oklch(0.7 0 0);
+  --color-forest-500: oklch(0.55 0 0);
+  --color-forest-600: oklch(0.32 0 0);
+  --color-forest-700: oklch(0.22 0 0);
+  --color-forest-800: oklch(0.19 0 0);
+  --color-forest-900: oklch(0.16 0 0);
+  --color-forest-950: oklch(0 0 0);
 
-  /* Laterite: red earth, the warm accent. */
-  --color-earth-50: oklch(0.97 0.018 50);
-  --color-earth-100: oklch(0.93 0.04 48);
-  --color-earth-200: oklch(0.86 0.07 46);
-  --color-earth-300: oklch(0.77 0.105 44);
-  --color-earth-400: oklch(0.68 0.135 42);
-  --color-earth-500: oklch(0.6 0.15 40);
-  --color-earth-600: oklch(0.53 0.145 38);
-  --color-earth-700: oklch(0.45 0.12 36);
-  --color-earth-800: oklch(0.37 0.095 35);
+  /* The accent. 500 is the accent itself and takes on-accent text. */
+  --color-earth-50: oklch(0.975 0 0);
+  --color-earth-100: oklch(0.95 0 0);
+  --color-earth-200: oklch(0.9 0 0);
+  --color-earth-300: oklch(0.82 0 0);
+  --color-earth-400: oklch(0.3 0 0);
+  --color-earth-500: oklch(0 0 0);
+  --color-earth-600: oklch(0.4 0 0);
+  --color-earth-700: oklch(0.26 0 0);
+  --color-earth-800: oklch(0.18 0 0);
 
-  /* Brass: survey lines, eyebrows, the logo's beacon. */
-  --color-brass-100: oklch(0.95 0.035 85);
-  --color-brass-200: oklch(0.9 0.065 84);
-  --color-brass-300: oklch(0.85 0.09 82);
-  --color-brass-400: oklch(0.78 0.11 78);
-  --color-brass-500: oklch(0.72 0.12 75);
-  --color-brass-600: oklch(0.6 0.11 72);
-  --color-brass-700: oklch(0.5 0.09 70);
+  /* Silver: survey lines, eyebrows and figures on black grounds. The same in both themes. */
+  --color-brass-100: oklch(0.93 0 0);
+  --color-brass-200: oklch(0.9 0 0);
+  --color-brass-300: oklch(0.86 0 0);
+  --color-brass-400: oklch(0.8 0 0);
+  --color-brass-500: oklch(0.7 0 0);
+  --color-brass-600: oklch(0.5 0 0);
+  --color-brass-700: oklch(0.38 0 0);
+
+  /* Notices and statuses are told apart by weight and outline, not hue. */
+  --color-amber-50: oklch(0.972 0 0);
+  --color-amber-100: oklch(0.93 0 0);
+  --color-amber-500: oklch(0.5 0 0);
+  --color-amber-800: oklch(0.24 0 0);
+  --color-sky-100: oklch(0.93 0 0);
+  --color-sky-500: oklch(0.4 0 0);
+  --color-sky-800: oklch(0.22 0 0);
+  --color-stone-100: oklch(0.955 0 0);
+  --color-stone-200: oklch(0.92 0 0);
+  --color-stone-400: oklch(0.68 0 0);
+  --color-stone-500: oklch(0.52 0 0);
+  --color-stone-700: oklch(0.34 0 0);
 
   /* One corner scale: controls 10px, tiles 14px, cards 20px, panels 28px. */
   --radius-lg: 0.5rem;
@@ -68,17 +87,26 @@
   --color-primary-hover: var(--t-primary-hover);
   --color-on-primary: var(--t-on-primary);
   --color-accent: var(--t-accent);
+  --color-on-accent: var(--t-on-accent);
   --color-danger: var(--t-danger);
 
-  --shadow-soft: 0 1px 1px oklch(0.2 0.03 160 / 0.04), 0 2px 6px -2px oklch(0.2 0.03 160 / 0.06);
-  --shadow-card: 0 1px 2px oklch(0.2 0.03 160 / 0.04), 0 8px 24px -12px oklch(0.2 0.03 160 / 0.14);
-  --shadow-lift: 0 2px 4px oklch(0.2 0.03 160 / 0.04), 0 24px 48px -16px oklch(0.2 0.04 160 / 0.26);
+  --shadow-soft: 0 1px 1px oklch(0 0 0 / 0.04), 0 2px 6px -2px oklch(0 0 0 / 0.06);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 10px 28px -14px oklch(0 0 0 / 0.16);
+  --shadow-lift: 0 2px 4px oklch(0 0 0 / 0.05), 0 28px 56px -18px oklch(0 0 0 / 0.3);
 
   --animate-rise: rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-fade-in: fade-in 0.25s ease-out both;
   --animate-draw: draw 2.4s cubic-bezier(0.6, 0, 0.2, 1) both;
   --animate-float: float 7s ease-in-out infinite;
   --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-marquee: marquee 60s linear infinite;
+
+  /* A band of words sliding past: two copies side by side, each moving one full width. */
+  @keyframes marquee {
+    to {
+      transform: translateX(-100%);
+    }
+  }
 
   @keyframes rise {
     from {
@@ -129,73 +157,80 @@
 
 :root {
   color-scheme: light;
-  --t-canvas: oklch(0.985 0.006 85);
+  --t-canvas: oklch(1 0 0);
   --t-surface: oklch(1 0 0);
-  --t-sunken: oklch(0.962 0.009 85);
-  --t-line: oklch(0.915 0.01 82);
-  --t-line-strong: oklch(0.855 0.014 80);
-  --t-ink: oklch(0.2 0.025 160);
-  --t-ink-soft: oklch(0.39 0.02 155);
-  --t-ink-faint: oklch(0.55 0.015 140);
-  --t-primary: var(--color-forest-900);
-  --t-primary-hover: var(--color-forest-950);
-  --t-on-primary: oklch(0.99 0.01 155);
-  --t-accent: var(--color-earth-500);
+  --t-sunken: oklch(0.967 0 0);
+  --t-line: oklch(0.915 0 0);
+  --t-line-strong: oklch(0.84 0 0);
+  --t-ink: oklch(0 0 0);
+  --t-ink-soft: oklch(0.32 0 0);
+  --t-ink-faint: oklch(0.52 0 0);
+  --t-primary: oklch(0 0 0);
+  --t-primary-hover: oklch(0.27 0 0);
+  --t-on-primary: oklch(1 0 0);
+  --t-accent: oklch(0 0 0);
+  --t-on-accent: oklch(1 0 0);
   --t-danger: oklch(0.55 0.2 27);
-  /* The deep green of the hero, the footer and the deal room's header. */
-  --deep: oklch(0.22 0.04 162);
-  --deep-2: oklch(0.17 0.03 165);
+  /* The black of the hero, the footer and the deal room's header. */
+  --deep: oklch(0 0 0);
+  --deep-2: oklch(0 0 0);
 }
 
 @media screen {
   [data-theme="dark"] {
     color-scheme: dark;
-    --t-canvas: oklch(0.16 0.015 165);
-    --t-surface: oklch(0.2 0.018 163);
-    --t-sunken: oklch(0.14 0.013 165);
-    --t-line: oklch(0.28 0.02 163);
-    --t-line-strong: oklch(0.36 0.022 163);
-    --t-ink: oklch(0.95 0.01 120);
-    --t-ink-soft: oklch(0.77 0.015 140);
-    --t-ink-faint: oklch(0.62 0.015 150);
-    --t-primary: oklch(0.8 0.11 155);
-    --t-primary-hover: oklch(0.86 0.09 155);
-    --t-on-primary: oklch(0.19 0.04 162);
-    --t-accent: oklch(0.72 0.13 44);
+    --t-canvas: oklch(0 0 0);
+    --t-surface: oklch(0.1 0 0);
+    --t-sunken: oklch(0.07 0 0);
+    --t-line: oklch(0.26 0 0);
+    --t-line-strong: oklch(0.36 0 0);
+    --t-ink: oklch(1 0 0);
+    --t-ink-soft: oklch(0.78 0 0);
+    --t-ink-faint: oklch(0.6 0 0);
+    --t-primary: oklch(1 0 0);
+    --t-primary-hover: oklch(0.86 0 0);
+    --t-on-primary: oklch(0 0 0);
+    --t-accent: oklch(1 0 0);
+    --t-on-accent: oklch(0 0 0);
     --t-danger: oklch(0.65 0.19 25);
-    --deep: oklch(0.2 0.03 163);
-    --deep-2: oklch(0.13 0.02 165);
+    --deep: oklch(0.1 0 0);
+    --deep-2: oklch(0.1 0 0);
 
-    --color-forest-50: oklch(0.23 0.03 160);
-    --color-forest-100: oklch(0.28 0.05 158);
-    --color-forest-200: oklch(0.35 0.07 157);
-    --color-forest-300: oklch(0.45 0.09 156);
-    --color-forest-700: oklch(0.8 0.1 155);
-    --color-forest-800: oklch(0.86 0.08 155);
-    --color-forest-900: oklch(0.91 0.06 155);
+    --color-forest-50: oklch(0.2 0 0);
+    --color-forest-100: oklch(0.25 0 0);
+    --color-forest-200: oklch(0.31 0 0);
+    --color-forest-300: oklch(0.42 0 0);
+    --color-forest-600: oklch(0.8 0 0);
+    --color-forest-700: oklch(0.9 0 0);
+    --color-forest-800: oklch(0.94 0 0);
+    --color-forest-900: oklch(0.97 0 0);
 
-    --color-earth-50: oklch(0.24 0.035 42);
-    --color-earth-100: oklch(0.3 0.06 42);
-    --color-earth-200: oklch(0.38 0.08 42);
-    --color-earth-700: oklch(0.8 0.11 45);
-    --color-earth-800: oklch(0.86 0.08 48);
+    --color-earth-50: oklch(0.2 0 0);
+    --color-earth-100: oklch(0.25 0 0);
+    --color-earth-200: oklch(0.32 0 0);
+    --color-earth-300: oklch(0.45 0 0);
+    --color-earth-400: oklch(0.84 0 0);
+    --color-earth-500: oklch(1 0 0);
+    --color-earth-600: oklch(0.72 0 0);
+    --color-earth-700: oklch(0.85 0 0);
+    --color-earth-800: oklch(0.93 0 0);
 
-    --color-brass-100: oklch(0.27 0.04 80);
-    --color-brass-200: oklch(0.34 0.06 80);
-    --color-brass-700: oklch(0.82 0.1 80);
-
-    --color-amber-50: oklch(0.25 0.035 75);
-    --color-amber-100: oklch(0.31 0.06 75);
-    --color-amber-800: oklch(0.86 0.11 82);
+    --color-amber-50: oklch(0.2 0 0);
+    --color-amber-100: oklch(0.27 0 0);
+    --color-amber-500: oklch(0.7 0 0);
+    --color-amber-800: oklch(0.9 0 0);
+    --color-sky-100: oklch(0.27 0 0);
+    --color-sky-500: oklch(0.75 0 0);
+    --color-sky-800: oklch(0.92 0 0);
+    --color-stone-100: oklch(0.22 0 0);
+    --color-stone-200: oklch(0.28 0 0);
+    --color-stone-400: oklch(0.55 0 0);
+    --color-stone-500: oklch(0.65 0 0);
+    --color-stone-700: oklch(0.82 0 0);
     --color-red-50: oklch(0.25 0.045 25);
     --color-red-100: oklch(0.31 0.08 25);
     --color-red-700: oklch(0.76 0.14 22);
     --color-red-800: oklch(0.82 0.11 22);
-    --color-sky-100: oklch(0.31 0.06 235);
-    --color-sky-800: oklch(0.84 0.09 230);
-    --color-stone-100: oklch(0.25 0.016 165);
-    --color-stone-200: oklch(0.3 0.018 165);
-    --color-stone-700: oklch(0.82 0.012 150);
   }
 }
 
@@ -217,19 +252,19 @@
   p {
     text-wrap: pretty;
   }
-  /* Fraunces at its display optical size, a touch soft: the voice of headings and prices. */
+  /* Fraunces at its display optical size, cut sharp: the voice of headings and prices. */
   .font-display {
     font-variation-settings:
-      "opsz" 72,
-      "SOFT" 30;
-    letter-spacing: -0.004em;
+      "opsz" 96,
+      "SOFT" 0;
+    letter-spacing: -0.012em;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    background: var(--color-earth-200);
-    color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-canvas);
   }
   :focus-visible {
     outline: 2px solid var(--color-accent);
@@ -263,18 +298,23 @@
 }
 
 @layer components {
-  /* The deep green ground of the hero and footer, lit from one corner. */
+  /* The black ground of the hero, the footer and the deal room's header. */
   .deep-ground {
+    background: var(--deep);
+  }
+  /* Over a photograph (components/photo.tsx): black where the words are, clearing towards the
+     far side so the land shows through. */
+  .photo-veil {
     background:
-      radial-gradient(900px 500px at 85% -10%, oklch(0.42 0.09 155 / 0.45), transparent 65%),
-      radial-gradient(700px 420px at -10% 110%, oklch(0.45 0.12 40 / 0.22), transparent 70%),
-      linear-gradient(180deg, var(--deep), var(--deep-2));
+      linear-gradient(100deg, oklch(0 0 0 / 0.8) 0%, oklch(0 0 0 / 0.5) 45%, oklch(0 0 0 / 0.1) 100%),
+      linear-gradient(0deg, oklch(0 0 0 / 0.6), transparent 40%),
+      linear-gradient(180deg, oklch(0 0 0 / 0.45), transparent 22%);
   }
   /* Survey paper: a faint grid, as on a plan. */
   .survey-grid {
     background-image:
-      linear-gradient(to right, var(--grid-line, oklch(0.5 0.03 160 / 0.07)) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-line, oklch(0.5 0.03 160 / 0.07)) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line, oklch(0.5 0 0 / 0.08)) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line, oklch(0.5 0 0 / 0.08)) 1px, transparent 1px);
     background-size: 28px 28px;
   }
   /* Prose in the agreement and guides. */
@@ -284,6 +324,35 @@
     line-height: 1.75;
     white-space: pre-wrap;
     color: var(--color-ink);
+  }
+  /* A slider as a single line: ink up to the thumb (set --p to its percentage), a rule after. */
+  .range {
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    cursor: pointer;
+    background: linear-gradient(to right, var(--color-ink) var(--p, 0%), var(--color-line-strong) var(--p, 0%));
+    outline-offset: 12px;
+  }
+  .range::-webkit-slider-thumb {
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    border: 2px solid var(--color-ink);
+    background: var(--color-canvas);
+    transition: background-color 0.15s ease;
+  }
+  .range::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    border: 2px solid var(--color-ink);
+    background: var(--color-canvas);
+  }
+  .range:hover::-webkit-slider-thumb,
+  .range:active::-webkit-slider-thumb {
+    background: var(--color-ink);
   }
   .no-scrollbar {
     scrollbar-width: none;

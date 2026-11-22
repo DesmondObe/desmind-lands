@@ -49,14 +49,14 @@ export function Toaster() {
         <div
           key={t.id}
           role={t.tone === "error" ? "alert" : "status"}
-          className="pointer-events-auto flex max-w-md animate-rise items-center gap-3 rounded-full bg-[oklch(0.22_0.04_162)] py-2.5 pr-3 pl-3.5 text-sm font-medium text-white shadow-2xl ring-1 ring-white/10"
+          className="pointer-events-auto flex max-w-md animate-rise items-center gap-3 rounded-full bg-[oklch(0.16_0_0)] py-2.5 pr-3 pl-3.5 text-sm font-medium text-white shadow-2xl ring-1 ring-white/10"
         >
           <span
             aria-hidden="true"
             className={
               t.tone === "error"
                 ? "grid size-5 shrink-0 place-items-center rounded-full bg-red-500 text-[11px] font-bold"
-                : "grid size-5 shrink-0 place-items-center rounded-full bg-[#D2AE62] text-[oklch(0.22_0.04_165)]"
+                : "grid size-5 shrink-0 place-items-center rounded-full bg-white text-black"
             }
           >
             {t.tone === "error" ? (

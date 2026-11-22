@@ -284,13 +284,13 @@ export default function DealRoom({ params }: { params: Promise<{ id: string }> }
           <div
             className={cx(
               "flex animate-rise items-center gap-4 rounded-3xl px-6 py-5",
-              room.nextStep.yours ? "bg-earth-500 text-white" : "border border-line bg-surface text-ink-soft",
+              room.nextStep.yours ? "bg-accent text-on-accent" : "border border-line bg-surface text-ink-soft",
             )}
           >
             <span
               className={cx(
                 "grid size-10 shrink-0 place-items-center rounded-full",
-                room.nextStep.yours ? "bg-white/20" : "bg-sunken",
+                room.nextStep.yours ? "bg-on-accent/15" : "bg-sunken",
               )}
             >
               <Icon d={room.nextStep.yours ? icons.pen : icons.calendar} />
@@ -715,7 +715,7 @@ function Checks({ room, reload, me }: Ctx) {
                   <span
                     className={cx(
                       "grid size-7 shrink-0 place-items-center rounded-lg border-2",
-                      on ? "border-forest-600 bg-forest-600 text-white" : "border-line-strong",
+                      on ? "border-primary bg-primary text-on-primary" : "border-line-strong",
                     )}
                   >
                     {on && <Icon d={icons.check} className="size-4" />}
@@ -855,7 +855,7 @@ function toLocalInput(iso: string) {
 
 function BankCard({ d }: { d: Room["deal"] }) {
   return (
-    <div className="mt-4 rounded-3xl bg-forest-900 p-6 text-white dark:bg-forest-100 dark:text-forest-950">
+    <div className="mt-4 rounded-3xl bg-forest-950 p-6 text-white dark:ring-1 dark:ring-white/12">
       <p className="text-xs font-bold tracking-widest text-brass-300 uppercase">Pay only into</p>
       <p className="mt-3 font-mono text-3xl tracking-wider">{d.bankAccountNumber}</p>
       <p className="mt-2 text-lg">{d.bankAccountName}</p>
@@ -922,7 +922,7 @@ function Witnesses({ room, reload, me }: Ctx) {
                       <span
                         className={cx(
                           "mt-0.5 grid size-8 shrink-0 place-items-center rounded-full text-xs font-bold",
-                          w.current ? "bg-forest-600 text-white" : "bg-sunken text-ink-faint",
+                          w.current ? "bg-primary text-on-primary" : "bg-sunken text-ink-faint",
                         )}
                       >
                         {w.current ? <Icon d={icons.check} className="size-4" /> : w.fullName[0]}
@@ -1014,7 +1014,7 @@ function Witnesses({ room, reload, me }: Ctx) {
               Copy link
             </Button>
             <a
-              className="inline-flex h-9 items-center gap-2 rounded-full bg-[#1f9d55] px-4 text-[13px] font-semibold text-white"
+              className="inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-[13px] font-semibold text-on-primary"
               href={`https://wa.me/${whatsappNumber(link.phone)}?text=${encodeURIComponent(share(link.name, link.url))}`}
               target="_blank"
               rel="noreferrer"
@@ -1185,7 +1185,7 @@ function Agreement({ room, reload, me }: Ctx) {
         {room.role !== "admin" &&
           (mine ? (
             <div className="flex items-center gap-4 border-t border-line bg-forest-50 px-7 py-5">
-              <span className="grid size-10 place-items-center rounded-full bg-forest-600 text-white">
+              <span className="grid size-10 place-items-center rounded-full bg-primary text-on-primary">
                 <Icon d={icons.check} />
               </span>
               <div>
@@ -1599,9 +1599,7 @@ function Conversation({ room, reload, me }: Ctx) {
               <div
                 className={cx(
                   "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm",
-                  mine
-                    ? "rounded-br-md bg-forest-900 text-white dark:bg-forest-200 dark:text-forest-950"
-                    : "rounded-bl-md bg-sunken text-ink",
+                  mine ? "rounded-br-md bg-primary text-on-primary" : "rounded-bl-md bg-sunken text-ink",
                 )}
               >
                 <p className="whitespace-pre-wrap">{m.body}</p>

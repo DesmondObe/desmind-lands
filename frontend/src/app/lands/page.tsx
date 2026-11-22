@@ -3,8 +3,9 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { CardSkeleton, ListingCard } from "@/components/listing-card";
+import { Photo } from "@/components/photo";
 import { Page } from "@/components/shell";
-import { Button, cx, Empty, ErrorText, Eyebrow, Icon, icons, Select, TitleSearchSeal } from "@/components/ui";
+import { Button, cx, Empty, ErrorText, Eyebrow, Icon, icons, Select } from "@/components/ui";
 import { api, type ListingCard as Card } from "@/lib/api";
 import { HOME_LGAS, LAND_USE, POPULAR_AREAS, TITLE_LABEL } from "@/lib/land";
 
@@ -91,16 +92,13 @@ function Market() {
       <div className="grid animate-rise items-end gap-8 lg:grid-cols-[1fr_auto]">
         <div>
           <Eyebrow>Land for sale in Enugu State</Eyebrow>
-          <h1 className="mt-4 font-display text-[2.75rem] leading-[1.02] text-ink sm:text-6xl">
-            Buy straight from <span className="text-earth-600 italic dark:text-accent">the owner.</span>
+          <h1 className="mt-5 font-display text-5xl leading-[0.98] tracking-[-0.025em] text-ink sm:text-7xl">
+            Buy from <span className="text-ink-faint italic">the owner.</span>
           </h1>
-          <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-ink-soft">
-            No agent, no commission. Every plot here had its title searched at the Enugu State Ministry of Lands before
-            it was listed.
-          </p>
+          <p className="mt-5 max-w-xl text-lg text-ink-soft">No agent. No commission. Every title searched first.</p>
         </div>
-        <div className="rounded-2xl border border-line bg-surface p-4 pr-6 shadow-card">
-          <TitleSearchSeal />
+        <div className="relative hidden h-52 w-[30rem] overflow-hidden bg-black lg:block">
+          <Photo name="nsukka-wide" sizes="480px" eager />
         </div>
       </div>
 
