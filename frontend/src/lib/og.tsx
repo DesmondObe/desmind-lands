@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 /**
@@ -11,7 +13,12 @@ const FOREST = "#0A0A0A";
 const BRASS = "#FFFFFF";
 const LATERITE = "#FFFFFF";
 
-export function ogCard({
+/** The site's display face, read once from frontend/assets (the web app runs from frontend/). */
+const font = (file: string) => readFile(join(process.cwd(), "assets/fonts", file));
+const fonts = Promise.all([font("fraunces-latin-400-normal.woff"), font("fraunces-latin-400-italic.woff")]);
+const SERIF = "Fraunces";
+
+export async function ogCard({
   eyebrow,
   title,
   price,
@@ -24,6 +31,7 @@ export function ogCard({
   facts?: string[];
   seal?: string;
 }) {
+  const [regular, italic] = await fonts;
   return new ImageResponse(
     <div
       style={{
@@ -73,7 +81,7 @@ export function ogCard({
           <circle cx="8.5" cy="21.5" r="2.3" fill={LATERITE} />
         </svg>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 30, fontWeight: 600 }}>DesMind</div>
+          <div style={{ display: "flex", fontSize: 34, fontFamily: SERIF, letterSpacing: -0.5 }}>DesMind</div>
           <div
             style={{ display: "flex", fontSize: 13, letterSpacing: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}
           >
@@ -99,15 +107,28 @@ export function ogCard({
           {eyebrow}
         </div>
         {price && (
-          <div style={{ display: "flex", marginTop: 22, fontSize: 104, fontWeight: 700, lineHeight: 1 }}>{price}</div>
+          <div
+            style={{
+              display: "flex",
+              marginTop: 22,
+              fontSize: 108,
+              fontFamily: SERIF,
+              letterSpacing: -3,
+              lineHeight: 1,
+            }}
+          >
+            {price}
+          </div>
         )}
         <div
           style={{
             display: "flex",
             marginTop: price ? 22 : 26,
-            fontSize: price ? 44 : 68,
-            fontWeight: price ? 500 : 700,
-            lineHeight: 1.15,
+            fontSize: price ? 44 : 72,
+            fontFamily: SERIF,
+            fontStyle: price ? "italic" : "normal",
+            letterSpacing: price ? -0.5 : -2,
+            lineHeight: 1.12,
             color: price ? "rgba(255,255,255,0.92)" : "white",
           }}
         >
@@ -163,6 +184,12 @@ export function ogCard({
         )}
       </div>
     </div>,
-    ogSize,
+    {
+      ...ogSize,
+      fonts: [
+        { name: SERIF, data: regular, weight: 400, style: "normal" },
+        { name: SERIF, data: italic, weight: 400, style: "italic" },
+      ],
+    },
   );
 }

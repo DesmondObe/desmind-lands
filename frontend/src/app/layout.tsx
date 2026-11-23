@@ -26,7 +26,8 @@ export const metadata: Metadata = {
     siteName: "DesMind Lands",
     locale: "en_NG",
     title: "DesMind Lands: sell your land. Keep every naira.",
-    description: "Land sold directly, owner to buyer, with witnesses and a signed agreement. No agents, no 10% cut.",
+    description:
+      "Land in Enugu State, sold by its owner. No agents, no commission, and every title searched before it is listed.",
     url: "/",
   },
   twitter: { card: "summary_large_image" },
