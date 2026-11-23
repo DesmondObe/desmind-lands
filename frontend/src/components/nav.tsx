@@ -56,7 +56,7 @@ export function ThemeToggle({ light }: { light?: boolean }) {
 }
 
 /**
- * The header. Over a photographed hero it sits inside the photograph's frame, clear, with
+ * The header. Over a photographed hero it is clear, with
  * white lettering; once the page scrolls it becomes a slim white bar. Links are lettered in
  * the monospace like the labels on a plan, and the page you are on carries a beacon dot.
  */
@@ -108,7 +108,7 @@ export function Nav() {
       className={cx(
         "fixed z-50 transition-[background-color,border-color,inset] duration-300 print:hidden",
         overHero
-          ? "inset-x-2 top-2 border-b border-white/20 bg-transparent sm:inset-x-3 sm:top-3"
+          ? "inset-x-0 top-0 border-b border-white/30 bg-transparent"
           : "inset-x-0 top-0 border-b border-line bg-canvas/90 backdrop-blur-xl",
       )}
     >
@@ -231,45 +231,54 @@ export function Nav() {
       </div>
 
       {open && (
-        <div className="flex h-[calc(100dvh-4rem)] animate-fade-in flex-col overflow-y-auto border-t border-line bg-canvas px-5 pt-2 pb-8 sm:px-8 lg:hidden">
-          <nav className="flex flex-col" aria-label="Main">
-            {links.map(([href, label], i) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-baseline gap-5 border-b border-line py-5 text-ink"
-                aria-current={active(href) ? "page" : undefined}
-              >
-                <span className="plan-label text-ink-faint">0{i + 1}</span>
-                <span className="font-display text-[2rem] leading-none">{label}</span>
-                {active(href) && <span className="ml-auto size-2 self-center rounded-full bg-ink" aria-hidden="true" />}
-              </Link>
-            ))}
-          </nav>
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-8">
-            {me ? (
-              <>
-                <ButtonLink href="/account" variant="secondary">
-                  Account
-                </ButtonLink>
-                <button
-                  type="button"
-                  onClick={leave}
-                  className="h-11 border border-line-strong text-sm font-semibold text-ink"
+        <>
+          {/* The rest of the page, dimmed: a tap there closes the menu. */}
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setOpen(false)}
+            className="absolute inset-x-0 top-full h-dvh animate-fade-in bg-black/55 lg:hidden"
+          />
+          {/* The menu: three quarters of the screen, from the top right corner. */}
+          <div className="absolute top-full right-0 flex h-[75dvh] w-3/4 animate-fade-in flex-col overflow-y-auto border-b border-l border-line bg-canvas px-6 pt-2 pb-6 shadow-lift lg:hidden">
+            <nav className="flex flex-col" aria-label="Main">
+              {links.map(([href, label]) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center border-b border-line py-5 text-ink"
+                  aria-current={active(href) ? "page" : undefined}
                 >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                <ButtonLink href="/login" variant="secondary">
-                  Sign in
-                </ButtonLink>
-                <ButtonLink href="/sell">List your land</ButtonLink>
-              </>
-            )}
+                  <span className="font-display text-[1.75rem] leading-none">{label}</span>
+                  {active(href) && <span className="ml-auto size-2 rounded-full bg-ink" aria-hidden="true" />}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-auto grid gap-3 pt-8">
+              {me ? (
+                <>
+                  <ButtonLink href="/account" variant="secondary">
+                    Account
+                  </ButtonLink>
+                  <button
+                    type="button"
+                    onClick={leave}
+                    className="h-11 border border-line-strong text-sm font-semibold text-ink"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <ButtonLink href="/login" variant="secondary">
+                    Sign in
+                  </ButtonLink>
+                  <ButtonLink href="/sell">List your land</ButtonLink>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );

@@ -390,3 +390,12 @@
   font-style: normal;
   opacity: 0.55;
 }
+
+/* The hero headline: the serif at its display size, with a true italic. */
+.hero-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-variation-settings:
+    "opsz" 96,
+    "SOFT" 0;
+}

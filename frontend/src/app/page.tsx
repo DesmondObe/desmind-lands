@@ -11,10 +11,9 @@ import { api, type ListingCard as Card } from "@/lib/api";
 import { formatKobo, HOME_LGAS } from "@/lib/land";
 
 /*
- * The home page, laid out like a survey plan: a photograph of Enugu in a square frame with the
- * headline and the search set at its foot over a title block of figures, then one narrow column
- * with plenty of air: firm headings over a short rule, small type, monospace labels, and the
- * photographs of Enugu State.
+ * The home page: a photographed hero with its words in the middle, then a white sheet that rises
+ * over it on rounded corners. Everything below sits in one narrow column with plenty of air:
+ * firm headings over a short rule, small type, monospace labels, and the photographs of Enugu State.
  */
 
 /** The gallery: photograph, the name shown, the area searched, and the tile's place in the mosaic. */
@@ -88,75 +87,58 @@ export default function Home() {
   return (
     <>
       {/* ---------------------------------------------------------------- Hero */}
-      <section className="bg-canvas p-2 sm:p-3">
-        <div className="relative flex min-h-[calc(100svh-1rem)] flex-col overflow-hidden bg-black text-white sm:min-h-[calc(100svh-1.5rem)]">
-          <PhotoGround name="enugu-city" eager />
-          <div className="relative mx-auto flex w-full max-w-[92rem] flex-1 animate-rise flex-col justify-end px-5 pt-32 sm:px-8">
-            <p className="plan-label flex items-center gap-3 text-white/85">
-              <span className="size-1.5 rounded-full bg-white" aria-hidden="true" />
-              Enugu State
-              <span className="text-white/55">06°27′N 07°30′E</span>
-            </p>
-            <h1 className="mt-5 font-display text-[2.6rem] leading-[1] sm:text-[3.5rem] lg:text-[4.25rem]">
-              Sell your land.
-              <br />
-              <span className="italic">Keep every naira.</span>
-            </h1>
+      <section className="relative flex min-h-[88vh] flex-col overflow-hidden bg-black text-white">
+        <PhotoGround name="enugu-city" eager />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-1 animate-rise flex-col items-center justify-center px-5 pt-28 pb-24 text-center">
+          <h1 className="hero-serif text-[2.5rem] leading-[1.05] tracking-[-0.025em] sm:text-[3.4rem]">
+            Sell your land. <span className="italic">Keep every naira.</span>
+          </h1>
+          <p className="mt-4 text-lg text-white sm:text-xl">No agents. No commission. Every title searched first.</p>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-12">
-              <p className="max-w-sm text-[17px] leading-snug text-white/90">
-                No agents. No commission. Every title searched first.
-              </p>
-              <form
-                onSubmit={search}
-                className="flex w-full flex-col gap-1.5 bg-white p-1.5 text-left sm:flex-row lg:w-[38rem]"
-              >
-                <label className="flex flex-1 items-center gap-3 px-3.5 text-black">
-                  <Icon d={icons.search} className="size-5 shrink-0 text-black" />
-                  <span className="sr-only">Town or area</span>
-                  <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Area, layout or estate"
-                    className="h-12 w-full bg-transparent text-[15px] text-black outline-none placeholder:text-neutral-500"
-                  />
-                </label>
-                <select
-                  value={lga}
-                  onChange={(e) => setLga(e.target.value)}
-                  aria-label="Local government area"
-                  className="h-12 border-neutral-200 bg-white px-3.5 text-sm font-medium text-black outline-none sm:w-40 sm:border-l"
-                >
-                  <option value="">All of Enugu</option>
-                  {HOME_LGAS.map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-                <Button type="submit" variant="earth" className="h-12 px-6">
-                  Find land
-                  <Icon d={icons.arrow} className="size-4" />
-                </Button>
-              </form>
-            </div>
-
-            {/* The title block: the plan's figures along the foot of the frame. */}
-            <dl className="mt-10 grid grid-cols-2 border-t border-white/25 sm:grid-cols-4">
-              {figures.slice(0, 4).map(([big, small], i) => (
-                <div
-                  key={small}
-                  className={`flex flex-col gap-1.5 py-5 sm:flex-row sm:items-baseline sm:gap-3 sm:py-6 ${i % 2 ? "border-l border-white/25 pl-5" : ""} ${i > 1 ? "border-t border-white/25 sm:border-t-0" : ""} ${i === 2 ? "sm:border-l sm:pl-5" : ""}`}
-                >
-                  <dt className="sr-only">{small}</dt>
-                  <dd className="font-display text-[1.75rem] leading-none tabular sm:text-[2rem]">{big}</dd>
-                  <dd className="plan-label text-white/70">{small}</dd>
-                </div>
+          <form
+            onSubmit={search}
+            className="mt-9 flex w-full max-w-xl flex-col gap-2 rounded-[1.5rem] bg-white p-2 text-left sm:flex-row sm:rounded-full"
+          >
+            <label className="flex flex-1 items-center gap-3 px-4 text-black">
+              <Icon d={icons.search} className="size-5 text-black" />
+              <span className="sr-only">Town or area</span>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Area, layout or estate"
+                className="h-11 w-full bg-transparent text-[15px] text-black outline-none placeholder:text-neutral-500"
+              />
+            </label>
+            <select
+              value={lga}
+              onChange={(e) => setLga(e.target.value)}
+              aria-label="Local government area"
+              className="h-11 rounded-full bg-white px-4 text-sm font-semibold text-black outline-none sm:w-40"
+            >
+              <option value="">All of Enugu</option>
+              {HOME_LGAS.map((s) => (
+                <option key={s}>{s}</option>
               ))}
-            </dl>
-          </div>
+            </select>
+            <Button type="submit" variant="earth" className="h-11 !rounded-full">
+              Find land
+            </Button>
+          </form>
         </div>
+
+        <a
+          href="#about"
+          className="absolute inset-x-0 bottom-16 mx-auto flex w-fit flex-col items-center gap-2 text-xs text-white"
+        >
+          Scroll down
+          <span className="flex h-9 w-5 justify-center rounded-full border border-white pt-1.5" aria-hidden="true">
+            <span className="h-2 w-0.5 animate-bounce rounded-full bg-white" />
+          </span>
+        </a>
       </section>
 
-      <div className="relative -mb-24 bg-canvas">
+      {/* The white sheet that rises over the photograph. */}
+      <div className="relative -mt-10 -mb-24 rounded-t-[2.5rem] bg-canvas sm:rounded-t-[3.5rem]">
         {/* -------------------------------------------------------------- Who we are */}
         <section id="about" className={`${COLUMN} scroll-mt-24 pt-20 sm:pt-28`}>
           <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-20">
@@ -172,15 +154,15 @@ export default function Home() {
                 price, sign one contract before witnesses, and the buyer pays the seller directly.
               </p>
             </div>
-            <figure className="lg:pt-2">
-              <div className="relative aspect-[4/3] overflow-hidden bg-black">
-                <Photo name="nsukka-homes" sizes="(min-width: 1024px) 400px, 100vw" />
-              </div>
-              <figcaption className="plan-label mt-3 flex justify-between text-ink-faint">
-                <span>Fig. 01</span>
-                <span>Nsukka, Enugu State</span>
-              </figcaption>
-            </figure>
+            <dl className="grid grid-cols-2 content-start gap-x-10 gap-y-8 lg:pt-2">
+              {figures.map(([big, small]) => (
+                <div key={small}>
+                  <dt className="sr-only">{small}</dt>
+                  <dd className="font-display text-[2.5rem] leading-none text-ink tabular">{big}</dd>
+                  <dd className="mt-2 text-[13px] text-ink-soft">{small}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 

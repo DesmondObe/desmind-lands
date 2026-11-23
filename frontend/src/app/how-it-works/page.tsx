@@ -103,28 +103,26 @@ function ArrowLink({ href, children }: { href: string; children: ReactNode }) {
 export default function HowItWorks() {
   return (
     <>
-      <section className="bg-canvas p-2 sm:p-3">
-        <div className="relative flex min-h-[68svh] flex-col overflow-hidden bg-black text-white">
-          <PhotoGround name="enugu-homes" eager />
-          <div className="relative mx-auto flex w-full max-w-[92rem] flex-1 animate-rise flex-col justify-end px-5 pt-32 pb-10 sm:px-8 sm:pb-12">
-            <p className="plan-label flex items-center gap-3 text-white/85">
-              <span className="size-1.5 rounded-full bg-white" aria-hidden="true" />
-              The guide
-              <span className="text-white/55">Offer to handover</span>
-            </p>
-            <h1 className="mt-5 font-display text-[2.6rem] leading-[1] sm:text-[3.5rem] lg:text-[4.25rem]">
-              A seller. A buyer.
-              <br />
-              <span className="italic">And witnesses.</span>
-            </h1>
-            <p className="mt-6 max-w-sm text-[17px] leading-snug text-white/90">
-              No agent. No commission. Offer to handover.
-            </p>
-          </div>
+      <section className="relative flex min-h-[70vh] flex-col overflow-hidden bg-black text-white">
+        <PhotoGround name="enugu-homes" eager />
+        <div className="relative mx-auto flex w-full max-w-3xl flex-1 animate-rise flex-col items-center justify-center px-5 pt-28 pb-24 text-center">
+          <h1 className="hero-serif text-[2.5rem] leading-[1.05] tracking-[-0.025em] sm:text-[3.4rem]">
+            A seller. A buyer. <span className="italic">And witnesses.</span>
+          </h1>
+          <p className="mt-4 text-lg text-white sm:text-xl">No agent. No commission. Offer to handover.</p>
         </div>
+        <a
+          href="#sellers"
+          className="absolute inset-x-0 bottom-16 mx-auto flex w-fit flex-col items-center gap-2 text-xs text-white"
+        >
+          Scroll down
+          <span className="flex h-9 w-5 justify-center rounded-full border border-white pt-1.5" aria-hidden="true">
+            <span className="h-2 w-0.5 animate-bounce rounded-full bg-white" />
+          </span>
+        </a>
       </section>
 
-      <div className="relative -mb-24 bg-canvas">
+      <div className="relative -mt-10 -mb-24 rounded-t-[2.5rem] bg-canvas sm:rounded-t-[3.5rem]">
         <div className={`${COLUMN} grid gap-x-16 lg:grid-cols-2`}>
           {(
             [
