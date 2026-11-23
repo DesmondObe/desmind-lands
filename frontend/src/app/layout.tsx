@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Geist_Mono, Manrope } from "next/font/google";
+import { Bricolage_Grotesque, Fraunces, Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Nav } from "@/components/nav";
@@ -11,7 +11,10 @@ import { contact, siteUrl } from "@/lib/site";
 import { themeBootScript } from "@/lib/theme";
 import "./globals.css";
 
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
+// A grotesque for headings, Geist for reading and Geist Mono for labels, as on a survey plan.
+// Fraunces is kept only for signatures.
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", axes: ["SOFT", "opsz"] });
 
@@ -41,7 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       data-theme="light"
       suppressHydrationWarning
-      className={`${manrope.variable} ${geistMono.variable} ${fraunces.variable}`}
+      className={`${geist.variable} ${bricolage.variable} ${geistMono.variable} ${fraunces.variable}`}
     >
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static theme boot script, must run before paint. */}

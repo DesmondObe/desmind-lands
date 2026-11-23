@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { THEME_STORAGE_KEY } from "@/lib/theme";
 import { useSession } from "./session";
-import { ButtonLink, cx, Logo } from "./ui";
+import { ButtonLink, cx, Icon, icons, Logo } from "./ui";
 
 /** Pages that open on a black, photographed hero: the header sits over it, light on dark. */
 const DARK_HERO = ["/", "/how-it-works"];
@@ -55,6 +55,11 @@ export function ThemeToggle({ light }: { light?: boolean }) {
   );
 }
 
+/**
+ * The header. Over a photographed hero it sits inside the photograph's frame, clear, with
+ * white lettering; once the page scrolls it becomes a slim white bar. Links are lettered in
+ * the monospace like the labels on a plan, and the page you are on carries a beacon dot.
+ */
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -71,6 +76,13 @@ export function Nav() {
   }, []);
   // biome-ignore lint/correctness/useExhaustiveDependencies: close the menu whenever the page changes.
   useEffect(() => setOpen(false), [pathname]);
+  // The open menu covers the page, so the page behind it must not scroll.
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   const links: [string, string][] = [
     ["/lands", "Buy land"],
@@ -80,164 +92,180 @@ export function Nav() {
     ...(me?.user.platformRole === "admin" ? ([["/admin", "Review"]] as [string, string][]) : []),
   ];
   const active = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const leave = async () => {
+    await signOut();
+    router.push("/");
+  };
+  const initials = me?.user.fullName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <header
       className={cx(
-        "fixed inset-x-0 top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300 print:hidden",
+        "fixed z-50 transition-[background-color,border-color,inset] duration-300 print:hidden",
         overHero
-          ? "border-b border-white/30 bg-transparent"
-          : "border-b border-line bg-canvas/80 backdrop-blur-xl backdrop-saturate-150",
+          ? "inset-x-2 top-2 border-b border-white/20 bg-transparent sm:inset-x-3 sm:top-3"
+          : "inset-x-0 top-0 border-b border-line bg-canvas/90 backdrop-blur-xl",
       )}
     >
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center gap-6 px-4 sm:px-6">
-        <Link href="/" aria-label="DesMind Lands, home">
+      <div
+        className={cx(
+          "mx-auto flex max-w-[92rem] items-center gap-6 px-5 transition-[height] duration-300 sm:px-8",
+          overHero ? "h-[4.75rem]" : "h-16",
+        )}
+      >
+        <Link href="/" aria-label="DesMind Lands, home" className="shrink-0">
           <Logo inverted={overHero} />
         </Link>
-        <nav className="ml-6 hidden items-center gap-1 lg:flex">
-          {links.map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
-              className={cx(
-                "relative rounded-full px-3.5 py-2 text-[14px] font-semibold transition",
-                overHero ? "text-white hover:text-white" : active(href) ? "text-ink" : "text-ink",
-              )}
-            >
-              {label}
-              {href === "/dashboard" && !!me?.openDeals && (
+
+        <nav className="mx-auto hidden items-center lg:flex" aria-label="Main">
+          {links.map(([href, label]) => {
+            const on = active(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={on ? "page" : undefined}
+                className={cx(
+                  "group plan-label relative flex h-10 items-center gap-2 px-4 text-[11.5px] transition-colors",
+                  overHero ? "text-white/80 hover:text-white" : on ? "text-ink" : "text-ink-soft hover:text-ink",
+                )}
+              >
                 <span
                   className={cx(
-                    "ml-1.5 inline-grid min-w-5 place-items-center rounded-full px-1.5 text-[10px] font-bold",
-                    overHero ? "bg-white text-black" : "bg-accent text-on-accent",
+                    "size-1.5 rounded-full transition",
+                    on
+                      ? overHero
+                        ? "bg-white"
+                        : "bg-ink"
+                      : "scale-0 bg-current opacity-0 group-hover:scale-100 group-hover:opacity-60",
                   )}
-                >
-                  {me.openDeals}
-                </span>
-              )}
-              {active(href) && !overHero && (
-                <span className="absolute inset-x-3.5 -bottom-[17px] h-0.5 rounded-full bg-accent" aria-hidden="true" />
-              )}
-            </Link>
-          ))}
+                  aria-hidden="true"
+                />
+                {label}
+                {href === "/dashboard" && !!me?.openDeals && (
+                  <span
+                    className={cx(
+                      "grid h-[18px] min-w-[18px] place-items-center px-1 text-[10px] font-semibold tracking-normal",
+                      overHero ? "bg-white text-black" : "bg-ink text-canvas",
+                    )}
+                  >
+                    {me.openDeals}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/lands"
-            className={cx(
-              "mr-2 hidden items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold xl:flex",
-              overHero ? "bg-white/8 text-white/80 ring-1 ring-white/15" : "bg-sunken text-ink-soft ring-1 ring-line",
-            )}
-          >
-            <span
-              className={cx("size-1.5 animate-pulse-dot rounded-full", overHero ? "bg-white" : "bg-accent")}
-              aria-hidden="true"
-            />
-            Now in Enugu State
-          </Link>
+
+        <div className="ml-auto flex items-center gap-1 lg:ml-0">
           <ThemeToggle light={overHero} />
           {me ? (
-            <div className="hidden items-center gap-2 sm:flex">
-              <Link
-                href="/account"
-                className={cx(
-                  "grid size-10 place-items-center rounded-full text-sm font-bold",
-                  overHero ? "bg-white/10 text-white ring-1 ring-white/20" : "bg-ink text-canvas",
-                )}
-                title={me.user.fullName}
-              >
-                {me.user.fullName
-                  .split(/\s+/)
-                  .slice(0, 2)
-                  .map((p) => p[0])
-                  .join("")
-                  .toUpperCase()}
-              </Link>
+            <div className="hidden items-center gap-1 sm:flex">
               <button
                 type="button"
-                onClick={async () => {
-                  await signOut();
-                  router.push("/");
-                }}
-                className={cx("rounded-full px-3 py-2 text-[13px] font-semibold", overHero ? "text-white" : "text-ink")}
+                onClick={leave}
+                className={cx(
+                  "plan-label h-10 px-3 text-[11.5px] transition-colors",
+                  overHero ? "text-white/80 hover:text-white" : "text-ink-soft hover:text-ink",
+                )}
               >
                 Sign out
               </button>
+              <Link
+                href="/account"
+                title={me.user.fullName}
+                className={cx(
+                  "grid size-10 place-items-center rounded-full text-[13px] font-semibold",
+                  overHero ? "bg-white text-black" : "bg-ink text-canvas",
+                )}
+              >
+                {initials}
+              </Link>
             </div>
           ) : (
-            <div className="hidden items-center gap-2 sm:flex">
+            <div className="hidden items-center gap-1 sm:flex">
               <Link
                 href="/login"
-                className={cx("rounded-full px-4 py-2 text-[14px] font-semibold", overHero ? "text-white" : "text-ink")}
+                className={cx(
+                  "plan-label flex h-10 items-center px-3 text-[11.5px] transition-colors",
+                  overHero ? "text-white/80 hover:text-white" : "text-ink-soft hover:text-ink",
+                )}
               >
                 Sign in
               </Link>
-              <ButtonLink href="/sell" size="sm" variant={overHero ? "light" : "primary"}>
+              <ButtonLink href="/sell" size="md" variant={overHero ? "light" : "primary"} className="ml-2 h-10">
                 List your land
+                <Icon d={icons.arrow} className="size-4" />
               </ButtonLink>
             </div>
           )}
           <button
             type="button"
             onClick={() => setOpen(!open)}
-            aria-label="Menu"
+            aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className={cx(
-              "grid size-10 place-items-center rounded-full lg:hidden",
-              overHero ? "text-white hover:bg-white/10" : "text-ink hover:bg-sunken",
-            )}
+            className={cx("ml-1 flex h-10 items-center gap-2.5 px-2 lg:hidden", overHero ? "text-white" : "text-ink")}
           >
-            <svg
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              className="size-5"
-              aria-hidden="true"
-            >
-              {open ? (
-                <path d="M5 5l10 10M15 5 5 15" strokeLinecap="round" />
-              ) : (
-                <path d="M3 6h14M3 10h14M3 14h14" strokeLinecap="round" />
-              )}
-            </svg>
+            <span className="plan-label text-[11.5px]">{open ? "Close" : "Menu"}</span>
+            <span className="relative block h-2.5 w-6" aria-hidden="true">
+              <span
+                className={cx(
+                  "absolute inset-x-0 h-px bg-current transition-transform duration-300",
+                  open ? "top-1/2 rotate-45" : "top-0",
+                )}
+              />
+              <span
+                className={cx(
+                  "absolute inset-x-0 h-px bg-current transition-transform duration-300",
+                  open ? "top-1/2 -rotate-45" : "bottom-0",
+                )}
+              />
+            </span>
           </button>
         </div>
       </div>
+
       {open && (
-        <div className="animate-fade-in border-t border-line bg-canvas px-4 pt-3 pb-6 lg:hidden">
-          <nav className="flex flex-col">
-            {links.map(([href, label]) => (
-              <Link key={href} href={href} className="border-b border-line py-4 font-display text-2xl text-ink">
-                {label}
+        <div className="flex h-[calc(100dvh-4rem)] animate-fade-in flex-col overflow-y-auto border-t border-line bg-canvas px-5 pt-2 pb-8 sm:px-8 lg:hidden">
+          <nav className="flex flex-col" aria-label="Main">
+            {links.map(([href, label], i) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-baseline gap-5 border-b border-line py-5 text-ink"
+                aria-current={active(href) ? "page" : undefined}
+              >
+                <span className="plan-label text-ink-faint">0{i + 1}</span>
+                <span className="font-display text-[2rem] leading-none">{label}</span>
+                {active(href) && <span className="ml-auto size-2 self-center rounded-full bg-ink" aria-hidden="true" />}
               </Link>
             ))}
           </nav>
-          <div className="mt-5 flex gap-3">
+          <div className="mt-auto grid grid-cols-2 gap-3 pt-8">
             {me ? (
               <>
-                <ButtonLink href="/account" variant="secondary" className="flex-1">
+                <ButtonLink href="/account" variant="secondary">
                   Account
                 </ButtonLink>
                 <button
                   type="button"
-                  onClick={async () => {
-                    await signOut();
-                    router.push("/");
-                  }}
-                  className="flex-1 rounded-full border border-line-strong py-3 text-sm font-semibold"
+                  onClick={leave}
+                  className="h-11 border border-line-strong text-sm font-semibold text-ink"
                 >
                   Sign out
                 </button>
               </>
             ) : (
               <>
-                <ButtonLink href="/login" variant="secondary" className="flex-1">
+                <ButtonLink href="/login" variant="secondary">
                   Sign in
                 </ButtonLink>
-                <ButtonLink href="/sell" className="flex-1">
-                  List your land
-                </ButtonLink>
+                <ButtonLink href="/sell">List your land</ButtonLink>
               </>
             )}
           </div>

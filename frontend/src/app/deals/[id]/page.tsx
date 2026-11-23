@@ -1189,7 +1189,7 @@ function Agreement({ room, reload, me }: Ctx) {
                 <Icon d={icons.check} />
               </span>
               <div>
-                <p className="font-display text-2xl text-forest-800 italic">{mine.signedName}</p>
+                <p className="font-serif text-2xl text-forest-800 italic">{mine.signedName}</p>
                 <p className="text-sm text-ink-soft">You signed {formatMoment(mine.signedAt)}</p>
               </div>
             </div>
@@ -1216,7 +1216,7 @@ function Agreement({ room, reload, me }: Ctx) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={!read}
-                  className="h-14 font-display text-2xl italic"
+                  className="h-14 font-serif text-2xl italic"
                   placeholder={myName}
                 />
               </Field>
@@ -1521,7 +1521,7 @@ function RecordPayment({ room, reload }: Ctx) {
           <Input
             value={f.signedName}
             onChange={(e) => setF({ ...f, signedName: e.target.value })}
-            className="font-display text-lg italic"
+            className="font-serif text-lg italic"
           />
         </Field>
         <ErrorText error={error} />

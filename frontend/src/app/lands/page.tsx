@@ -114,7 +114,7 @@ function Market() {
               update({ q: activeQ === a ? "" : a });
             }}
             className={cx(
-              "shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold ring-1 transition",
+              "shrink-0 rounded-none px-3.5 py-1.5 text-[13px] font-semibold ring-1 transition",
               activeQ === a
                 ? "bg-primary text-on-primary ring-primary"
                 : "bg-surface text-ink-soft ring-line hover:text-ink hover:ring-line-strong",
@@ -125,7 +125,7 @@ function Market() {
         ))}
       </div>
 
-      <div className="sticky top-[4.5rem] z-30 -mx-4 mt-6 border-b border-line bg-canvas/90 px-4 py-3.5 backdrop-blur-xl sm:-mx-6 sm:px-6">
+      <div className="sticky top-16 z-30 -mx-4 mt-6 border-b border-line bg-canvas/90 px-4 py-3.5 backdrop-blur-xl sm:-mx-6 sm:px-6">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -133,7 +133,7 @@ function Market() {
           }}
           className="flex flex-col gap-2.5"
         >
-          <label className="flex h-12 min-w-0 items-center gap-3 rounded-full border border-line-strong bg-surface px-4 shadow-soft transition focus-within:border-forest-600 focus-within:ring-4 focus-within:ring-forest-600/12">
+          <label className="flex h-12 min-w-0 items-center gap-3 rounded-none border border-line-strong bg-surface px-4 shadow-soft transition focus-within:border-forest-600 focus-within:ring-4 focus-within:ring-forest-600/12">
             <Icon d={icons.search} className="text-ink-faint" />
             <span className="sr-only">Search</span>
             <input
@@ -163,7 +163,7 @@ function Market() {
               aria-label="Local government area"
               value={params.get("lga") ?? ""}
               onChange={(e) => update({ lga: e.target.value })}
-              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-full! py-0 pr-9 pl-4 text-[14px] font-medium"
+              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-none! py-0 pr-9 pl-4 text-[14px] font-medium"
             >
               <option value="">All of Enugu</option>
               {HOME_LGAS.map((s) => (
@@ -177,7 +177,7 @@ function Market() {
                 const [minPrice = "", maxPrice = ""] = e.target.value.split("-");
                 update({ minPrice, maxPrice });
               }}
-              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-full! py-0 pr-9 pl-4 text-[14px] font-medium"
+              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-none! py-0 pr-9 pl-4 text-[14px] font-medium"
             >
               {PRICE_BANDS.map(([min, max, label]) => (
                 <option key={label} value={`${min}-${max}`}>
@@ -189,7 +189,7 @@ function Market() {
               aria-label="Title"
               value={params.get("titleKind") ?? ""}
               onChange={(e) => update({ titleKind: e.target.value })}
-              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-full! py-0 pr-9 pl-4 text-[14px] font-medium"
+              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-none! py-0 pr-9 pl-4 text-[14px] font-medium"
             >
               <option value="">Any title</option>
               {Object.entries(TITLE_LABEL).map(([k, v]) => (
@@ -202,7 +202,7 @@ function Market() {
               aria-label="Use"
               value={params.get("landUse") ?? ""}
               onChange={(e) => update({ landUse: e.target.value })}
-              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-full! py-0 pr-9 pl-4 text-[14px] font-medium"
+              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-none! py-0 pr-9 pl-4 text-[14px] font-medium"
             >
               <option value="">Any use</option>
               {Object.entries(LAND_USE).map(([k, v]) => (
@@ -215,7 +215,7 @@ function Market() {
               aria-label="Sort"
               value={params.get("sort") ?? "newest"}
               onChange={(e) => update({ sort: e.target.value === "newest" ? "" : e.target.value })}
-              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-full! py-0 pr-9 pl-4 text-[14px] font-medium"
+              className="h-10 w-auto! max-w-52 shrink-0 truncate rounded-none! py-0 pr-9 pl-4 text-[14px] font-medium"
             >
               <option value="newest">Newest</option>
               <option value="price_asc">Price: low to high</option>
@@ -313,7 +313,7 @@ function Market() {
 /** Previous and next, and the pages around this one: 1 … 4 5 6 … 20. */
 function Pagination({ page, pages, onPage }: { page: number; pages: number; onPage: (p: number) => void }) {
   const shown = [...new Set([1, page - 1, page, page + 1, pages])].filter((p) => p >= 1 && p <= pages);
-  const step = "grid h-10 place-items-center rounded-full text-sm font-semibold transition";
+  const step = "grid h-10 place-items-center rounded-none text-sm font-semibold transition";
   return (
     <nav aria-label="Pages" className="mt-12 flex items-center justify-center gap-1.5">
       <button

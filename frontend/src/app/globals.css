@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 /*
- * DesMind Lands. Pure black on pure white: the only colour on the site is in the photographs
- * of the land itself. Pages reach for the semantic tokens (canvas, surface, ink,
+ * DesMind Lands, drawn like a survey plan. Pure black on pure white, square corners, hairlines,
+ * a grotesque for headings and a monospace for labels: the only colour on the site is in the
+ * photographs of the land itself. Pages reach for the semantic tokens (canvas, surface, ink,
  * line, primary, accent); the dark theme turns them over, white on black.
  *
  * The scales keep their first names, and are now all neutral. `forest` runs from paper (50) to
@@ -17,8 +18,9 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   /* Paper to ink. */
@@ -68,12 +70,14 @@
   --color-stone-500: oklch(0.52 0 0);
   --color-stone-700: oklch(0.34 0 0);
 
-  /* One corner scale: controls 10px, tiles 14px, cards 20px, panels 28px. */
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.625rem;
-  --radius-2xl: 0.875rem;
-  --radius-3xl: 1.25rem;
-  --radius-4xl: 1.75rem;
+  /* Square corners throughout, as on a plan. Only dots, beacons and avatars are round. */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-4xl: 0;
 
   --color-canvas: var(--t-canvas);
   --color-surface: var(--t-surface);
@@ -252,12 +256,10 @@
   p {
     text-wrap: pretty;
   }
-  /* Fraunces at its display optical size, cut sharp: the voice of headings and prices. */
+  /* The grotesque, set tight and firm: the voice of headings and prices. */
   .font-display {
-    font-variation-settings:
-      "opsz" 96,
-      "SOFT" 0;
-    letter-spacing: -0.012em;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
@@ -319,7 +321,7 @@
   }
   /* Prose in the agreement and guides. */
   .agreement {
-    font-family: var(--font-display);
+    font-family: var(--font-serif);
     font-size: 15.5px;
     line-height: 1.75;
     white-space: pre-wrap;
@@ -354,10 +356,37 @@
   .range:active::-webkit-slider-thumb {
     background: var(--color-ink);
   }
+  /* A small label in the monospace, as lettered on a plan. */
+  .plan-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  /* Beacon ticks at the four corners of a frame. Set --tick for their colour. */
+  .plan-corners {
+    --c: var(--tick, currentColor);
+    background:
+      linear-gradient(var(--c), var(--c)) left top / 14px 1px no-repeat,
+      linear-gradient(var(--c), var(--c)) left top / 1px 14px no-repeat,
+      linear-gradient(var(--c), var(--c)) right top / 14px 1px no-repeat,
+      linear-gradient(var(--c), var(--c)) right top / 1px 14px no-repeat,
+      linear-gradient(var(--c), var(--c)) left bottom / 14px 1px no-repeat,
+      linear-gradient(var(--c), var(--c)) left bottom / 1px 14px no-repeat,
+      linear-gradient(var(--c), var(--c)) right bottom / 14px 1px no-repeat,
+      linear-gradient(var(--c), var(--c)) right bottom / 1px 14px no-repeat;
+  }
   .no-scrollbar {
     scrollbar-width: none;
   }
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* The second half of a headline steps back instead of leaning. Unlayered, so it beats the italic utility. */
+.font-display .italic {
+  font-style: normal;
+  opacity: 0.55;
 }

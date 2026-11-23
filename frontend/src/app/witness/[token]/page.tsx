@@ -121,7 +121,7 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
                 <Icon d={icons.check} className="size-7" />
               </span>
               <h2 className="mt-6 font-display text-4xl">Thank you. You have signed.</h2>
-              <p className="mt-3 font-display text-2xl text-brass-300 italic">{w.signedName}</p>
+              <p className="mt-3 font-serif text-2xl text-brass-300 italic">{w.signedName}</p>
               <p className="mt-1 text-white/60">{formatMoment(w.signedAt)}</p>
               <p className="mt-6 text-white/70">
                 Your signature is recorded with the agreement. You can close this page.
@@ -192,7 +192,7 @@ export default function WitnessPage({ params }: { params: Promise<{ token: strin
                     disabled={!read}
                     value={f.signedName}
                     onChange={(e) => setF({ ...f, signedName: e.target.value })}
-                    className="h-14 font-display text-2xl italic"
+                    className="h-14 font-serif text-2xl italic"
                   />
                 </Field>
                 <label className="flex items-start gap-3 text-sm text-ink-soft">

@@ -13,10 +13,14 @@ const FOREST = "#0A0A0A";
 const BRASS = "#FFFFFF";
 const LATERITE = "#FFFFFF";
 
-/** The site's display face, read once from frontend/assets (the web app runs from frontend/). */
+/** The site's faces, read once from frontend/assets (the web app runs from frontend/). */
 const font = (file: string) => readFile(join(process.cwd(), "assets/fonts", file));
-const fonts = Promise.all([font("fraunces-latin-400-normal.woff"), font("fraunces-latin-400-italic.woff")]);
-const SERIF = "Fraunces";
+const fonts = Promise.all([
+  font("bricolage-grotesque-latin-600-normal.woff"),
+  font("geist-sans-latin-500-normal.woff"),
+]);
+const DISPLAY = "Bricolage Grotesque";
+const BODY = "Geist";
 
 export async function ogCard({
   eyebrow,
@@ -31,7 +35,7 @@ export async function ogCard({
   facts?: string[];
   seal?: string;
 }) {
-  const [regular, italic] = await fonts;
+  const [display, body] = await fonts;
   return new ImageResponse(
     <div
       style={{
@@ -43,7 +47,7 @@ export async function ogCard({
         padding: 64,
         color: "white",
         background: `linear-gradient(135deg, #2A2A2A 0%, ${FOREST} 55%, #000000 100%)`,
-        fontFamily: "sans-serif",
+        fontFamily: BODY,
       }}
     >
       {/* The parcel, large and faint, off the right edge. */}
@@ -70,7 +74,7 @@ export async function ogCard({
 
       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
         <svg width="56" height="56" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="0.6" y="0.6" width="30.8" height="30.8" rx="9" fill="none" stroke={BRASS} strokeWidth="1.2" />
+          <rect x="0.6" y="0.6" width="30.8" height="30.8" fill="none" stroke={BRASS} strokeWidth="1.2" />
           <path
             d="M8.5 21.5 10.5 9.5l13 2.2 1 11.8-16-2Z"
             fill="none"
@@ -81,7 +85,7 @@ export async function ogCard({
           <circle cx="8.5" cy="21.5" r="2.3" fill={LATERITE} />
         </svg>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 34, fontFamily: SERIF, letterSpacing: -0.5 }}>DesMind</div>
+          <div style={{ display: "flex", fontSize: 32, fontFamily: DISPLAY, letterSpacing: -1 }}>DesMind</div>
           <div
             style={{ display: "flex", fontSize: 13, letterSpacing: 8, color: "rgba(255,255,255,0.7)", fontWeight: 700 }}
           >
@@ -112,8 +116,8 @@ export async function ogCard({
               display: "flex",
               marginTop: 22,
               fontSize: 108,
-              fontFamily: SERIF,
-              letterSpacing: -3,
+              fontFamily: DISPLAY,
+              letterSpacing: -4,
               lineHeight: 1,
             }}
           >
@@ -125,9 +129,8 @@ export async function ogCard({
             display: "flex",
             marginTop: price ? 22 : 26,
             fontSize: price ? 44 : 72,
-            fontFamily: SERIF,
-            fontStyle: price ? "italic" : "normal",
-            letterSpacing: price ? -0.5 : -2,
+            fontFamily: DISPLAY,
+            letterSpacing: price ? -1 : -2.5,
             lineHeight: 1.12,
             color: price ? "rgba(255,255,255,0.92)" : "white",
           }}
@@ -144,7 +147,7 @@ export async function ogCard({
               style={{
                 display: "flex",
                 padding: "10px 20px",
-                borderRadius: 999,
+                borderRadius: 0,
                 fontSize: 24,
                 background: "rgba(255,255,255,0.09)",
                 border: "1px solid rgba(255,255,255,0.16)",
@@ -161,7 +164,7 @@ export async function ogCard({
               alignItems: "center",
               gap: 12,
               padding: "12px 22px 12px 14px",
-              borderRadius: 999,
+              borderRadius: 0,
               fontSize: 24,
               fontWeight: 700,
               color: FOREST,
@@ -187,8 +190,8 @@ export async function ogCard({
     {
       ...ogSize,
       fonts: [
-        { name: SERIF, data: regular, weight: 400, style: "normal" },
-        { name: SERIF, data: italic, weight: 400, style: "italic" },
+        { name: DISPLAY, data: display, weight: 600, style: "normal" },
+        { name: BODY, data: body, weight: 500, style: "normal" },
       ],
     },
   );

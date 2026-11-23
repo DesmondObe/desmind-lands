@@ -14,7 +14,7 @@ type Variant = "primary" | "earth" | "secondary" | "danger" | "ghost" | "light";
 type Size = "sm" | "md" | "lg";
 
 const buttonBase =
-  "relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold tracking-tight transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50";
+  "relative inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-none font-semibold tracking-tight transition-[background-color,border-color,color,box-shadow,transform] duration-200 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50";
 
 const buttonVariant: Record<Variant, string> = {
   primary:
@@ -228,9 +228,9 @@ export function LogoMark({ className, inverted }: { className?: string; inverted
   return (
     <svg viewBox="0 0 32 32" className={cx("size-8 shrink-0", className)} aria-hidden="true">
       {inverted ? (
-        <rect x="0.6" y="0.6" width="30.8" height="30.8" rx="9" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
+        <rect x="0.6" y="0.6" width="30.8" height="30.8" fill="none" stroke="#FFFFFF" strokeWidth="1.2" />
       ) : (
-        <rect width="32" height="32" rx="9" fill="var(--color-ink)" />
+        <rect width="32" height="32" fill="var(--color-ink)" />
       )}
       <g
         fill={inverted ? "#FFFFFF" : "var(--color-canvas)"}
@@ -249,25 +249,15 @@ export function LogoMark({ className, inverted }: { className?: string; inverted
 
 export function Logo({ className, inverted }: { className?: string; inverted?: boolean }) {
   return (
-    <span className={cx("inline-flex items-center gap-2.5", className)}>
+    <span className={cx("inline-flex items-center gap-3", className)}>
       <LogoMark inverted={inverted} />
-      <span className="flex flex-col leading-none">
-        <span
-          className={cx(
-            "font-display text-[19px] font-medium tracking-[-0.01em]",
-            inverted ? "text-white" : "text-ink",
-          )}
-        >
-          DesMind
-        </span>
-        <span
-          className={cx(
-            "mt-1 pl-px text-[8.5px] font-extrabold tracking-[0.55em]",
-            inverted ? "text-white/70" : "text-ink-soft",
-          )}
-        >
-          LANDS
-        </span>
+      <span
+        className={cx(
+          "font-display text-[19px] leading-none font-semibold tracking-[-0.035em]",
+          inverted ? "text-white" : "text-ink",
+        )}
+      >
+        DesMind<span className={cx("font-normal", inverted ? "text-white/65" : "text-ink-faint")}> Lands</span>
       </span>
     </span>
   );
