@@ -31,18 +31,28 @@ const BUYERS = [
 ];
 
 const CHECKS = [
-  ["Visit the land", "In daylight, with the seller. Find every beacon. Ask the neighbours who owns it."],
+  [icons.pin, "Visit the land", "In daylight, with the seller. Find every beacon. Ask the neighbours who owns it."],
   [
+    icons.shield,
     "Read our title search",
     "We searched it at the Enugu State Ministry of Lands before listing. The reference and findings are in your deal room.",
   ],
-  ["Meet the owner", "In person, with ID that matches the name on the title and on our search."],
+  [icons.users, "Meet the owner", "In person, with ID that matches the name on the title and on our search."],
   [
+    icons.ruler,
     "Chart the survey plan",
     "A surveyor checks with the Surveyor-General that the land is not under government acquisition.",
   ],
-  ["Ask the community", "For family or community land, confirm the family head and principal members consent."],
-  ["Use a lawyer", "A lawyer of your own choosing can read the papers, and prepare the Deed of Assignment after."],
+  [
+    icons.chat,
+    "Ask the community",
+    "For family or community land, confirm the family head and principal members consent.",
+  ],
+  [
+    icons.doc,
+    "Use a lawyer",
+    "A lawyer of your own choosing can read the papers, and prepare the Deed of Assignment after.",
+  ],
 ];
 
 const SEARCHED = [
@@ -202,9 +212,15 @@ export default function HowItWorks() {
             Our title search is the first check, not the last. The deal room keeps the list.
           </p>
           <ol className="mt-12 grid gap-x-8 gap-y-10 text-center sm:grid-cols-2 lg:grid-cols-3">
-            {CHECKS.map(([t, b], i) => (
+            {CHECKS.map(([icon, t, b], i) => (
               <li key={t} className="border-t border-ink pt-5">
                 <p className="text-[13px] font-bold tracking-[0.2em] text-ink-faint">STEP 0{i + 1}</p>
+                <span
+                  className="mx-auto mt-5 grid size-16 place-items-center rounded-full bg-ink text-canvas"
+                  aria-hidden="true"
+                >
+                  <Icon d={icon} className="size-7" />
+                </span>
                 <h3 className="mt-4 text-lg font-semibold text-ink">{t}</h3>
                 <p className="mx-auto mt-2 max-w-[17rem] text-[13px] leading-relaxed text-ink-soft">{b}</p>
               </li>

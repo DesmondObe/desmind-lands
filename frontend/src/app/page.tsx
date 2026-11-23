@@ -16,21 +16,22 @@ import { formatKobo, HOME_LGAS } from "@/lib/land";
  * small headings over a short rule, small type, and the photographs of Enugu State.
  */
 
-const AREAS: [PhotoName, string][] = [
-  ["enugu-layout", "Independence Layout"],
-  ["iva-valley", "Enugu"],
-  ["nsukka-homes", "Nsukka"],
-  ["achi-plot", "Achi"],
-  ["enugu-road", "Oji River"],
-  ["ngwo-hill", "Ngwo"],
+/** The gallery: photograph, the name shown, the area searched, and the tile's place in the mosaic. */
+const AREAS: [PhotoName, string, string, string][] = [
+  ["nsukka-wide", "Nsukka", "Nsukka", "col-span-2 row-span-2"],
+  ["enugu-homes", "Oji River", "Oji River", "col-span-2 lg:col-span-2"],
+  ["achi-above", "Achi", "Achi", ""],
+  ["ngwo-pines", "Ngwo", "Ngwo", ""],
+  ["enugu-city", "Enugu", "Enugu", "col-span-2"],
+  ["nsukka-slope", "Nsukka hills", "Nsukka", "col-span-2"],
 ];
 
-const STEPS: [PhotoName, string, string][] = [
-  ["achi-plot", "Offer", "The buyer offers. The owner accepts, declines or counters."],
-  ["ngwo-hill", "Inspect", "Visit the land. See the title and the survey plan."],
-  ["nsukka-homes", "Sign", "One contract, with a witness for each side."],
-  ["enugu-layout", "Pay", "Buyer to seller, straight to the owner's account."],
-  ["iva-valley", "Hand over", "Papers and possession pass to the buyer."],
+const STEPS: [string, string, string][] = [
+  [icons.chat, "Offer", "The buyer offers. The owner accepts, declines or counters."],
+  [icons.eye, "Inspect", "Visit the land. See the title and the survey plan."],
+  [icons.pen, "Sign", "One contract, with a witness for each side."],
+  [icons.bank, "Pay", "Buyer to seller, straight to the owner's account."],
+  [icons.key, "Hand over", "Papers and possession pass to the buyer."],
 ];
 
 const PROMISES: [string, string, string][] = [
@@ -245,16 +246,19 @@ export default function Home() {
           <div className="relative mt-12">
             <div className="absolute inset-x-0 top-[5px] hidden h-px bg-ink lg:block" aria-hidden="true" />
             <ol className="grid grid-cols-2 gap-x-6 gap-y-12 text-center sm:grid-cols-3 lg:grid-cols-5">
-              {STEPS.map(([photo, title, body], i) => (
+              {STEPS.map(([icon, title, body], i) => (
                 <li key={title} className="flex flex-col items-center">
                   <span
                     className="relative hidden size-[11px] rounded-full border border-ink bg-canvas lg:block"
                     aria-hidden="true"
                   />
                   <p className="text-[13px] font-bold tracking-[0.2em] text-ink-faint lg:mt-6">STEP 0{i + 1}</p>
-                  <div className="relative mt-5 h-32 w-24 overflow-hidden rounded-[50%] bg-black">
-                    <Photo name={photo} sizes="96px" decorative />
-                  </div>
+                  <span
+                    className="mt-5 grid size-20 place-items-center rounded-full bg-ink text-canvas"
+                    aria-hidden="true"
+                  >
+                    <Icon d={icon} className="size-8" />
+                  </span>
                   <h3 className="mt-5 text-lg font-semibold text-ink">{title}</h3>
                   <p className="mt-2 max-w-[13rem] text-[13px] leading-relaxed text-ink-soft">{body}</p>
                 </li>
@@ -275,19 +279,26 @@ export default function Home() {
             <Heading>This is Enugu</Heading>
             <ArrowLink href="/lands">All land for sale</ArrowLink>
           </div>
-          <div className="mt-12 grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3">
-            {AREAS.map(([name, area]) => (
-              <Link key={name} href={`/lands?q=${encodeURIComponent(area)}`} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-black">
-                  <Photo
-                    name={name}
-                    sizes="(min-width: 1024px) 320px, 50vw"
-                    className="transition duration-700 ease-out group-hover:scale-105"
-                  />
-                </div>
-                <p className="mt-3 text-[15px] font-semibold text-ink underline-offset-4 group-hover:underline">
-                  {area}
-                </p>
+          <div className="mt-12 grid auto-rows-[9.5rem] grid-cols-2 gap-3 sm:auto-rows-[13rem] sm:gap-4 lg:grid-cols-4">
+            {AREAS.map(([name, label, area, span], i) => (
+              <Link
+                key={name}
+                href={`/lands?q=${encodeURIComponent(area)}`}
+                className={`group relative overflow-hidden rounded-3xl bg-black ${span}`}
+              >
+                <Photo
+                  name={name}
+                  sizes={i === 0 ? "(min-width: 1024px) 480px, 100vw" : "(min-width: 1024px) 480px, 50vw"}
+                  className="transition duration-700 ease-out group-hover:scale-105"
+                />
+                <span
+                  className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 to-transparent"
+                  aria-hidden="true"
+                />
+                <span className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-3 text-white">
+                  <span className={i === 0 ? "font-display text-3xl" : "text-[17px] font-semibold"}>{label}</span>
+                  <Icon d={icons.arrow} className="size-5 shrink-0 transition group-hover:translate-x-1" />
+                </span>
               </Link>
             ))}
           </div>

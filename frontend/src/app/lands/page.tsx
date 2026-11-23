@@ -100,7 +100,7 @@ function Market() {
           </p>
         </div>
         <div className="relative hidden h-52 w-[30rem] overflow-hidden rounded-3xl bg-black lg:block">
-          <Photo name="achi-plot" sizes="480px" eager />
+          <Photo name="enugu-homes" sizes="480px" eager />
         </div>
       </div>
 

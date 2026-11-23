@@ -83,7 +83,6 @@ function Footer() {
         ["/how-it-works#witnesses", "Witnesses"],
         ["/terms", "Terms of use"],
         ["/privacy", "Privacy"],
-        ["/credits", "Photo credits"],
       ],
     ],
   ];

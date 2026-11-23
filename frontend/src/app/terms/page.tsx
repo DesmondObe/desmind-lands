@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Prose } from "@/components/prose";
 import { contact } from "@/lib/site";
 
@@ -46,6 +47,13 @@ export default function Terms() {
       </p>
       <h2>Fees</h2>
       <p>Listing, offers and deal rooms are free. We take no commission from either side.</p>
+      <h2>Photographs</h2>
+      <p>
+        The photographs on this site are used under licence.{" "}
+        <Link href="/credits" className="text-ink underline underline-offset-2">
+          Acknowledgements
+        </Link>
+      </p>
       <h2>Contact</h2>
       <p>
         <a href={`mailto:${contact.email}`}>{contact.email}</a> · {contact.phone} · {contact.office}

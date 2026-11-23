@@ -201,8 +201,8 @@ export function PageTitle({
 
 export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="survey-grid flex flex-col items-center gap-3 rounded-3xl border border-dashed border-line-strong bg-surface/60 px-6 py-16 text-center">
-      <svg viewBox="0 0 48 48" fill="none" className="size-12 text-ink" aria-hidden="true">
+    <div className="flex flex-col items-center gap-3 rounded-3xl bg-sunken px-6 py-14 text-center">
+      <svg viewBox="0 0 48 48" fill="none" className="size-11 text-ink" aria-hidden="true">
         <path d="M8 34 14 12l22 4 4 20-32-2Z" stroke="currentColor" strokeWidth="1.6" strokeDasharray="3 3" />
         {[
           [8, 34],
@@ -213,7 +213,7 @@ export function Empty({ title, children, action }: { title: string; children?: R
           <circle key={`${x}${y}`} cx={x} cy={y} r="2.6" fill="currentColor" />
         ))}
       </svg>
-      <p className="font-display text-xl text-ink">{title}</p>
+      <p className="text-lg font-semibold tracking-tight text-ink">{title}</p>
       {children && <div className="max-w-sm text-sm leading-relaxed text-ink-soft">{children}</div>}
       {action && <div className="mt-2">{action}</div>}
     </div>
